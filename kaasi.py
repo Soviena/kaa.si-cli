@@ -22,12 +22,13 @@ def vidstreaming(url):
     for i in range(len(json['sources'])):
         print("[{num}] {label}".format(num=i,label=json['sources'][i]['label']))
     x = int(input("Select quality : "))
-    return json['sources'][x]['file']
-    #play_vid(json['sources'][x]['file'])
+    return play_vid(json['sources'][x]['file'])
 
 def play_vid(link,player='mpv'):
     link = link.replace('\\','')
-    os.system('{pl} "{link}"'.format(pl=player,link=link))
+    # uncomment for termux
+    os.system('am start --user 0 -a android.intent.action.VIEW -d "{link}" -n is.xyz.mpv/.MPVActivity'.format(link=link))
+    #os.system('{pl} "{link}"'.format(pl=player,link=link))
     return "Success"
 
 def parse_web(url, cloudflare=False):
