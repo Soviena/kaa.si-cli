@@ -1,6 +1,8 @@
 # kaa.si-cli
 Stream anime using MPV player from kaa.si with python
 
+Demo video : https://www.youtube.com/watch?v=JPpdru0FECs
+
 Requirement :
 MPV or VLC installed to path
 
