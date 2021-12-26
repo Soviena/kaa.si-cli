@@ -7,10 +7,10 @@ Base_Url = "https://www2.kickassanime.ro/"
 watch_history = {'anime' : {}, 'last' : {}}
 
 try:
-    with open('h.txt','r') as histo:
+    with open('./h.txt','r') as histo:
         watch_history = eval(histo.read())
 except:
-    with open('h.txt','w') as histo:
+    with open('./h.txt','w') as histo:
         histo.write(str(watch_history))
 
 
@@ -63,7 +63,7 @@ def play_vid(link,json_data,player='mpv'):
     elif x == 1:
         return play_vid(link,json_data)
     elif x == 2:
-        return select_episode(Base_Url+js['anime']['slug'])
+        return select_episode(Base_Url+json_data['anime']['slug'])
     return "Success"
 
 def parse_web(url, cloudflare=False):
@@ -212,3 +212,4 @@ def resume(histo):
 
 while True:
     print(main_menu())
+
