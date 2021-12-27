@@ -204,10 +204,10 @@ def history(histo):
         return "Finished anime is deleted from history"
     else:
         x = int(x)
-    if animes_v[i]['status'] == 'Finished Airing':
+    if animes_v[x]['status'] == 'Finished Airing':
         return 'The anime is finished airing and no next episode' 
-    elif animes_v[i]['next-link'] == '':
-        if animes_v[i]['json-data']['episode']['next'] != None:
+    elif animes_v[x]['next-link'] == '':
+        if animes_v[x]['json-data']['episode']['next'] != None:
             soup = parse_web(Base_Url+animes_v[i]['json-data']['episode']['next']['slug'])
             js = parse_appData(soup)
             return check_link(js)
