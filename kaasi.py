@@ -13,7 +13,6 @@ except:
     with open('./h.txt','w') as histo:
         histo.write(str(watch_history))
 
-
 def vidstreaming(url,json_data):
     from requests_html import HTMLSession
     soup = parse_web(url)
@@ -44,11 +43,11 @@ def play_vid(link,json_data,player='mpv'):
     #os.system('am start --user 0 -a android.intent.action.VIEW -d "{link}" -n is.xyz.mpv/.MPVActivity'.format(link=link))
     os.system('{pl} "{link}"'.format(pl=player,link=link))
     try :
-        watch_history['anime'][json_data['anime']['name']] = {'label' : json_data['episode']['name'], 'next-link' : Base_Url+json_data['episode']['next']['slug']}
-        watch_history['last'] = {'name' : json_data['anime']['name'] ,'episode-label' : json_data['episode']['name'], 'next-link' : Base_Url+json_data['episode']['next']['slug']}
+        watch_history['anime'][json_data['anime']['name']] = {'label' : json_data['episode']['name'], 'next-link' : Base_Url+json_data['episode']['next']['slug'], 'status': json_data['anime']['status'], 'json-data': json_data}
+        watch_history['last'] = {'name' : json_data['anime']['name'] ,'episode-label' : json_data['episode']['name'], 'next-link' : Base_Url+json_data['episode']['next']['slug'], 'status': json_data['anime']['status'], 'json-data': json_data}
     except :
-        watch_history['anime'][json_data['anime']['name']] = {'label' : json_data['episode']['name'], 'next-link' : ''}
-        watch_history['last'] = {'name' : json_data['anime']['name'] ,'episode-label' : json_data['episode']['name'], 'next-link' : ''}
+        watch_history['anime'][json_data['anime']['name']] = {'label' : json_data['episode']['name'], 'next-link' : '', 'status': json_data['anime']['status'], 'json-data': json_data}
+        watch_history['last'] = {'name' : json_data['anime']['name'] ,'episode-label' : json_data['episode']['name'], 'next-link' : '', 'status': json_data['anime']['status'], 'json-data': json_data}
     with open('h.txt','w') as histo:
         histo.write(str(watch_history))
     print("[0] Next episode\n[1] Play again\n[2] Select episode\n[3] Back to menu")
@@ -179,12 +178,14 @@ def decode_base64(text,lossless=False):
     return message_bytes.decode('ascii')
 
 def main_menu():
-    print("\nKAA CLI\ntype H for history\ntype R resume watching\nOr just type the anime title to search")
+    print("\nKAA CLI\ntype H for history\ntype R to resume watching\ntype A to see rencently uploaded\nOr just type the anime title to search")
     query = input("Input : ")
     if query in ('H','h'):
         return history(watch_history)
     elif query in ('R','r'):
         return resume(watch_history)
+    elif query in ('A','a'):
+        return recently_uploaded()        
     else:
         return search_anime(query)
     return exit()
@@ -193,22 +194,59 @@ def history(histo):
     animes_v = list(histo['anime'].values())
     animes_k = list(histo['anime'].keys())
     for i in range(len(animes_k)):
-        print('[{i}] {anime} {episode}'.format(i=i, anime=animes_k[i], episode=animes_v[i]['label']))
-    x = int(input('Select anime to resume watching : '))
-    if animes_v[x]['next-link'] == '':
-        return 'no next episode!' 
+        print('[{i}] {anime} {episode}'.format(i=i, anime=animes_k[i], episode=animes_v[i]['label']), end=' ')
+        if animes_v[i]['next-link'] == '' and animes_v[i]['status'] == 'Finished Airing':
+            print('Finished',end='')
+        print()
+    x = input('[D] to delete finished anime\nSelect anime to resume watching : ')
+    if x in ('D','d'):
+        clean_finished(histo)
+        return "Finished anime is deleted from history"
+    else:
+        x = int(x)
+    if animes_v[i]['status'] == 'Finished Airing':
+        return 'The anime is finished airing and no next episode' 
+    elif animes_v[i]['next-link'] == '':
+        if animes_v[i]['json-data']['episode']['next'] != None:
+            soup = parse_web(Base_Url+animes_v[i]['json-data']['episode']['next']['slug'])
+            js = parse_appData(soup)
+            return check_link(js)
+        return 'not yet updated' 
     soup = parse_web(animes_v[x]['next-link'])
     js = parse_appData(soup)    
     return check_link(js)    
 
+def clean_finished(histo):
+    animes_v = list(histo['anime'].values())
+    animes_k = list(histo['anime'].keys())
+    for i in range(len(animes_k)):
+        if animes_v[i]['next-link'] == '' and animes_v[i]['status'] == 'Finished Airing':
+            histo['anime'].pop(animes_k[i])    
+
 def resume(histo):
     print('Last session :',histo['last']['name'],histo['last']['episode-label'])
     if histo['last']['next-link'] == '':
-        return 'no next episode!' 
+        if histo['last']['status'] == 'Currently Airing':
+            if histo['last']['json-data']['episode']['next'] != None:
+                soup = parse_web(Base_Url+histo['last']['json-data']['episode']['next']['slug'])
+                js = parse_appData(soup)
+                return check_link(js)
+            else:
+                return 'Not yet updated'
+        return 'Finished airing!' 
     soup = parse_web(histo['last']['next-link'])
     js = parse_appData(soup)
     return check_link(js)
 
+def recently_uploaded():
+    soup = parse_web(Base_Url)
+    js = parse_appData(soup)
+    for i in range(len(js['animeList']['sub'])):
+        print('[{num}]'.format(num=i),js['animeList']['sub'][i]['name']+" Episode "+js['animeList']['sub'][i]['episode'])
+    x = int(input("input : "))
+    soup = parse_web(Base_Url+js['animeList']['sub'][x]['slug'])
+    js = parse_appData(soup)
+    return check_link(js)
 
 while True:
     print(main_menu())
