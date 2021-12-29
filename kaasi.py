@@ -5,7 +5,15 @@ import base64, os
 
 Base_Url = "https://www2.kickassanime.ro/"
 watch_history = {'anime' : {}, 'last' : {}}
+logo = """
 
+\033[95m██   ██\033[93m  █████   █████ \033[95m       \033[94m ██████ \033[92m██     \033[91m ██ 
+\033[95m██  ██ \033[93m ██   ██ ██   ██\033[95m       \033[94m██      \033[92m██     \033[91m ██ 
+\033[95m█████  \033[93m ███████ ███████\033[95m █████ \033[94m██      \033[92m██     \033[91m ██ 
+\033[95m██  ██ \033[93m ██   ██ ██   ██\033[95m       \033[94m██      \033[92m██     \033[91m ██ 
+\033[95m██   ██\033[93m ██   ██ ██   ██\033[95m       \033[94m ██████ \033[92m███████\033[91m ██ 
+\033[0m                                          
+"""
 try:
     with open('./h.txt','r') as histo:
         watch_history = eval(histo.read())
@@ -125,8 +133,11 @@ def search_anime(query):
         return
     animes = js['animes']
     for i in range(len(animes)):
-        print("[",i,"] ",animes[i]['name'])
-    x = int(input("input : "))
+        if i%2==0:
+            print("\033[96m[",i,"] ",animes[i]['name'],"\033[0m")
+        else:
+            print("\033[92m[",i,"] ",animes[i]['name'],"\033[0m")
+    x = int(input("\033[4m\033[92mInput\033[0m : "))
     return select_episode(Base_Url+animes[x]['slug'])
 
 def select_episode(link):
@@ -178,8 +189,8 @@ def decode_base64(text,lossless=False):
     return message_bytes.decode('ascii')
 
 def main_menu():
-    print("\nKAA CLI\ntype H for history\ntype R to resume watching\ntype A to see rencently uploaded\nOr just type the anime title to search")
-    query = input("Input : ")
+    print(logo+"\033[93mtype H for history\ntype R to resume watching\ntype A to see rencently uploaded\n\033[1mOr just type the anime title to search\033[0m\n")
+    query = input("\033[4m\033[92mInput\033[0m : ")
     if query in ('H','h'):
         return history(watch_history)
     elif query in ('R','r'):
@@ -208,7 +219,7 @@ def history(histo):
         return 'The anime is finished airing and no next episode' 
     elif animes_v[x]['next-link'] == '':
         if animes_v[x]['json-data']['episode']['next'] != None:
-            soup = parse_web(Base_Url+animes_v[i]['json-data']['episode']['next']['slug'])
+            soup = parse_web(Base_Url+animes_v[x]['json-data']['episode']['next']['slug'])
             js = parse_appData(soup)
             return check_link(js)
         return 'not yet updated' 
