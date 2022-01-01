@@ -5,9 +5,14 @@ import requests as s
 import re, json
 import base64, os
 
-client_id = "926022094976852038"  # Enter your Application ID here.
-RPC = Presence(client_id=client_id)
-RPC.connect()
+dcrpc = False;
+try:
+    client_id = "926022094976852038"  # Enter your Application ID here.
+    RPC = Presence(client_id=client_id)
+    RPC.connect()
+    drpc = True
+except:
+    print("Can't Connect to discord")
 
 Base_Url = "https://www2.kickassanime.ro/"
 watch_history = {'anime' : {}, 'last' : {}}
@@ -51,7 +56,11 @@ def vidstreaming(url,json_data):
     return play_vid(json['sources'][x]['file'],json_data)
 
 def play_vid(link,json_data,player='mpv'):
-    RPC.update(state=json_data['anime']['name'], details="Watching anime", start=time.time(), party_size=[int(re.findall(r' (\d*)',json_data['episode']['name'])[0]),len(json_data['episodes'])])
+    if drpc:
+        try:
+            RPC.update(state=json_data['anime']['name'] + "("+ re.findall(r' (\d*)',json_data['episode']['name'])[0] +" of "+len(json_data['episodes']) + ")", details="Watching anime", start=time.time())
+        except:
+            RPC.update(state=json_data['anime']['name'], details="Watching anime", start=time.time())
     print('Trying to play video...')
     link = link.replace('\\','')
     # uncomment for termux
@@ -196,7 +205,8 @@ def decode_base64(text,lossless=False):
     return message_bytes.decode('ascii')
 
 def main_menu():
-    RPC.update(state="In Main Menu", details="Browsing anime")
+    if drpc:
+        RPC.update(state="In Main Menu", details="Browsing anime")
     print(logo+"\033[93mtype H for history\ntype R to resume watching\ntype A to see rencently uploaded\n\033[1mOr just type the anime title to search\033[0m\n")
     query = input("\033[4m\033[92mInput\033[0m : ")
     if query in ('H','h'):
@@ -223,7 +233,7 @@ def history(histo):
         return "Finished anime is deleted from history"
     else:
         x = int(x)
-    if animes_v[x]['status'] == 'Finished Airing':
+    if animes_v[x]['status'] == 'Finished Airing' and animes_v[x]['next-link'] == '':
         return 'The anime is finished airing and no next episode' 
     elif animes_v[x]['next-link'] == '':
         soup = parse_web(Base_Url+animes_v[x]['json-data']['anime']['slug']+'/'+animes_v[x]['json-data']['episode']['slug']+'-'+animes_v[x]['json-data']['episode']['slug_id'])
@@ -245,7 +255,7 @@ def clean_finished(histo):
 
 def resume(histo):
     print('Last session :',histo['last']['name'],histo['last']['episode-label'])
-    if histo['last']['status'] == 'Finished Airing': return 'The anime is finished airing and no next episode' 
+    if histo['last']['status'] == 'Finished Airing' and histo['last']['next-link'] == '': return 'The anime is finished airing and no next episode' 
     if histo['last']['next-link'] == '':
         soup = parse_web(Base_Url+histo['last']['json-data']['anime']['slug']+'/'+histo['last']['json-data']['episode']['slug']+'-'+histo['last']['json-data']['episode']['slug_id'])
         js = parse_appData(soup)  
