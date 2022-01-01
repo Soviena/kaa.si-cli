@@ -10,7 +10,7 @@ try:
     client_id = "926022094976852038"  # Enter your Application ID here.
     RPC = Presence(client_id=client_id)
     RPC.connect()
-    drpc = True
+    dcrpc = True
 except:
     print("Can't Connect to discord")
 
@@ -56,7 +56,7 @@ def vidstreaming(url,json_data):
     return play_vid(json['sources'][x]['file'],json_data)
 
 def play_vid(link,json_data,player='mpv'):
-    if drpc:
+    if dcrpc:
         try:
             RPC.update(state=json_data['anime']['name'] + "("+ re.findall(r' (\d*)',json_data['episode']['name'])[0] +" of "+len(json_data['episodes']) + ")", details="Watching anime", start=time.time())
         except:
@@ -205,7 +205,7 @@ def decode_base64(text,lossless=False):
     return message_bytes.decode('ascii')
 
 def main_menu():
-    if drpc:
+    if dcrpc:
         RPC.update(state="In Main Menu", details="Browsing anime")
     print(logo+"\033[93mtype H for history\ntype R to resume watching\ntype A to see rencently uploaded\n\033[1mOr just type the anime title to search\033[0m\n")
     query = input("\033[4m\033[92mInput\033[0m : ")
