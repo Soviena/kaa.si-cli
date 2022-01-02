@@ -114,7 +114,13 @@ def check_link(js):
             player = re.search(r'var sources = \[.*\]',str(player)).group()
             player = player[14:]
             player = eval(player)
-            return sel_source(player,js)
+            try:
+                return sel_source(player,js)
+            except:
+                print("No source found\nTrying other sources...")
+                for i in range(len(js['ext_servers'])):
+                    if js['ext_servers'][i]['name'] == 'Vidstreaming':
+                        return vidstreaming(js['ext_servers'][i]['link'],js)                
     elif js['ext_servers'] != None:
         for i in range(len(js['ext_servers'])):
             if js['ext_servers'][i]['name'] == 'Vidstreaming':
@@ -123,9 +129,13 @@ def check_link(js):
         return "Direct download"
 
 def sel_source(json_list,json_data):
+    j = 0;
     for i in range(len(json_list)):
         if not ((json_list[i]['name'] == "MAVERICKKI") or (json_list[i]['name'] == "BETAPLAYER")):
             print("[{num}] {source}".format(num=i,source=json_list[i]['name']))
+            j+=1;
+    if j == 0 :
+        raise Exception("No available source")
     x = int(input("Select source : "))
     if json_list[i]['name'] == "A-KICKASSANIME":
         return check_method(str(json_list[x]['src']).replace('\\',''),json_data,json_list)
