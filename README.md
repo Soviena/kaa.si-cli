@@ -12,7 +12,7 @@ python library :
 - cloudscraper
 - requests
 - bs4
-- requests_html
+- pypresence
 
 feedback is apreciated
 
