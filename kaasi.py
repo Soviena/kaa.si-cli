@@ -33,27 +33,22 @@ except:
         histo.write(str(watch_history))
 
 def vidstreaming(url,json_data):
-    from requests_html import HTMLSession
     soup = parse_web(url)
     player = soup.find('script', text=re.compile("player.on"))
     jw_link = re.search(r"{ w.*",str(player)).group()
-
-    if "https" in jw_link:
-        jw_link = jw_link[21:-5]
-    else :
-        jw_link = "https:"+jw_link[21:-5]
     print("Getting link...")
+    jw_link = "https://gogoplay1.com/download?"+re.findall(r'(id.*)',jw_link)[0]
     try:
-        ses = HTMLSession()
-        page = ses.get(jw_link)
-        json = page.html.render(wait=1, script='jwplayer("myVideo").getPlaylistItem()')
-        for i in range(len(json['sources'])):
-            print("[{num}] {label}".format(num=i,label=json['sources'][i]['label']))
+        soup = parse_web(jw_link, True)
+        Vlink = soup.find_all('a')
+        for i in range(len(Vlink)):
+            if "vidstreaming" in str(Vlink[i]['href']):
+                print("[{}]".format(i),str(re.findall(r'(\d*P)',Vlink[i].text)))
         x = int(input("Select quality : "))
     except:
         x = input("Error occured, try again ? [y]: ")
         return vidstreaming(url,json_data)
-    return play_vid(json['sources'][x]['file'],json_data)
+    return play_vid(Vlink[x]['href'],json_data)
 
 def play_vid(link,json_data,player='mpv'):
     if dcrpc:
