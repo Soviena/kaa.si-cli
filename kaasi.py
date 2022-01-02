@@ -43,10 +43,11 @@ def vidstreaming(url,json_data):
         Vlink = soup.find_all('a')
         for i in range(len(Vlink)):
             if "vidstreaming" in str(Vlink[i]['href']):
-                print("[{}]".format(i),str(re.findall(r'(\d*P)',Vlink[i].text)))
+                print("[{}]".format(i),re.findall(r'(\d*P)',Vlink[i].text)[0])
         x = int(input("Select quality : "))
     except:
-        x = input("Error occured, try again ? [y]: ")
+        x = input("Error occured, try again ? [y/n]: ")
+        if x=='n' : return "Cancelled"
         return vidstreaming(url,json_data)
     return play_vid(Vlink[x]['href'],json_data)
 
