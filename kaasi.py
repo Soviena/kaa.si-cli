@@ -229,10 +229,13 @@ def history(histo):
     animes_v = list(histo['anime'].values())
     animes_k = list(histo['anime'].keys())
     for i in range(len(animes_k)):
-        print('[{i}] {anime} {episode}'.format(i=i, anime=animes_k[i], episode=animes_v[i]['label']), end=' ')
+        if i%2 == 0:
+            print('\033[96m[{i}] {anime} {episode}'.format(i=i, anime=animes_k[i], episode=animes_v[i]['label']), end=' ')
+        else:
+            print('\033[92m[{i}] {anime} {episode}'.format(i=i, anime=animes_k[i], episode=animes_v[i]['label']), end=' ')            
         if animes_v[i]['next-link'] == '' and animes_v[i]['status'] == 'Finished Airing':
             print('Finished',end='')
-        print()
+        print('\033[0m')
     x = input('[D] to delete finished anime\nSelect anime to resume watching : ')
     if x in ('D','d'):
         clean_finished(histo)
