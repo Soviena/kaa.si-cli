@@ -1,4 +1,5 @@
 from pypresence import Presence
+import cloudscraper
 import time
 from bs4 import BeautifulSoup
 import requests as s
@@ -54,7 +55,7 @@ def vidstreaming(url,json_data):
 def play_vid(link,json_data,player='mpv'):
     if dcrpc:
         try:
-            RPC.update(state=json_data['anime']['name'] + "("+ re.findall(r' (\d*)',json_data['episode']['name'])[0] +" of "+len(json_data['episodes']) + ")", details="Watching anime", start=time.time())
+            RPC.update(state=json_data['anime']['name'] + " ("+ re.findall(r' (\d*)',json_data['episode']['name'])[0] +" of "+str(len(json_data['episodes'])) + ")", details="Watching anime", start=time.time())
         except:
             RPC.update(state=json_data['anime']['name'], details="Watching anime", start=time.time())
     print('Trying to play video...')
@@ -86,7 +87,6 @@ def play_vid(link,json_data,player='mpv'):
     return "Success"
 
 def parse_web(url, cloudflare=False):
-    import cloudscraper
     if cloudflare:
         scraper = cloudscraper.create_scraper()
         page = scraper.get(url).text
