@@ -33,6 +33,18 @@ except:
     with open('./h.txt','w',encoding='utf-8') as histo:
         histo.write(str(watch_history))
 
+# try:
+#     with open('./kaa-cli.conf','r',encoding='utf-8') as histo:
+#         watch_history = eval(histo.read())
+# except:
+#     with open('./kaa-cli.conf','w',encoding='utf-8') as histo:
+#         x = int(input("[1] VLC\n[2] MPV\nChoose player :"))
+#         if x ==1:
+#             player = "vlc"
+#         elif x==2:
+#             player = "mpv"
+#         config = {}
+#         histo.write()
 def vidstreaming(url,json_data):
     soup = parse_web(url)
     player = soup.find('script', text=re.compile("player.on"))
@@ -52,7 +64,7 @@ def vidstreaming(url,json_data):
         return vidstreaming(url,json_data)
     return play_vid(Vlink[x]['href'],json_data)
 
-def play_vid(link,json_data,player='mpv'):
+def play_vid(link,json_data):
     if dcrpc:
         try:
             RPC.update(state=json_data['anime']['name'] + " ("+ re.findall(r' (\d*)',json_data['episode']['name'])[0] +" of "+str(len(json_data['episodes'])) + ")", details="Watching anime", start=time.time())
@@ -62,7 +74,7 @@ def play_vid(link,json_data,player='mpv'):
     link = link.replace('\\','')
     # uncomment for termux
     #os.system('am start --user 0 -a android.intent.action.VIEW -d "{link}" -n is.xyz.mpv/.MPVActivity'.format(link=link))
-    os.system('{pl} "{link}"'.format(pl=player,link=link))
+    os.system('{pl} "{link}"'.format(pl='mpv',link=link))
     try :
         watch_history['anime'][json_data['anime']['name']] = {'label' : json_data['episode']['name'], 'next-link' : Base_Url+json_data['episode']['next']['slug'], 'status': json_data['anime']['status'], 'json-data': json_data}
         watch_history['last'] = {'name' : json_data['anime']['name'] ,'episode-label' : json_data['episode']['name'], 'next-link' : Base_Url+json_data['episode']['next']['slug'], 'status': json_data['anime']['status'], 'json-data': json_data}
@@ -223,7 +235,6 @@ def main_menu():
         return recently_uploaded()        
     else:
         return search_anime(query)
-    return exit()
 
 def history(histo):
     animes_v = list(histo['anime'].values())
@@ -280,7 +291,10 @@ def recently_uploaded():
     soup = parse_web(Base_Url)
     js = parse_appData(soup)
     for i in range(len(js['animeList']['sub'])):
-        print('[{num}]'.format(num=i),js['animeList']['sub'][i]['name']+" Episode "+js['animeList']['sub'][i]['episode'])
+        if i%2==0:
+            print('\033[96m[{num}]'.format(num=i),js['animeList']['sub'][i]['name']+" Episode "+js['animeList']['sub'][i]['episode']+"\033[0m")
+        else:
+            print('\033[92m[{num}]'.format(num=i),js['animeList']['sub'][i]['name']+" Episode "+js['animeList']['sub'][i]['episode']+"\033[0m")            
     x = int(input("input : "))
     soup = parse_web(Base_Url+js['animeList']['sub'][x]['slug'])
     js = parse_appData(soup)
