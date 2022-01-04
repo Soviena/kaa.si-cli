@@ -22,9 +22,7 @@ inspired by https://github.com/pystardust/ani-cli
 1. Install python (if not installed) [Python website](https://www.python.org/)
 - Don't forget to add python to path
 2. Install python libraries
-```
-pip install cloudscraper requests bs4 pypresence
-```
+`pip install cloudscraper requests bs4 pypresence` or `pip install requirements.txt`
 3. Install VLC or MPV and add it to path
 - [MPV Website](https://mpv.io/)
 - [VLC Website](https://www.videolan.org/)
