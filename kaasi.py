@@ -33,18 +33,11 @@ except:
     with open('./h.txt','w',encoding='utf-8') as histo:
         histo.write(str(watch_history))
 
-# try:
-#     with open('./kaa-cli.conf','r',encoding='utf-8') as histo:
-#         watch_history = eval(histo.read())
-# except:
-#     with open('./kaa-cli.conf','w',encoding='utf-8') as histo:
-#         x = int(input("[1] VLC\n[2] MPV\nChoose player :"))
-#         if x ==1:
-#             player = "vlc"
-#         elif x==2:
-#             player = "mpv"
-#         config = {}
-#         histo.write()
+# connect with anilist ?
+# connect with my anime list ?
+
+mediaPlayer = 'mpv' # Change this to your desired media player
+
 def vidstreaming(url,json_data):
     soup = parse_web(url)
     player = soup.find('script', text=re.compile("player.on"))
@@ -74,7 +67,7 @@ def play_vid(link,json_data):
     link = link.replace('\\','')
     # uncomment for termux
     #os.system('am start --user 0 -a android.intent.action.VIEW -d "{link}" -n is.xyz.mpv/.MPVActivity'.format(link=link))
-    os.system('{pl} "{link}"'.format(pl='mpv',link=link))
+    os.system('{pl} "{link}"'.format(pl=mediaPlayer,link=link))
     try :
         watch_history['anime'][json_data['anime']['name']] = {'label' : json_data['episode']['name'], 'next-link' : Base_Url+json_data['episode']['next']['slug'], 'status': json_data['anime']['status'], 'json-data': json_data}
         watch_history['last'] = {'name' : json_data['anime']['name'] ,'episode-label' : json_data['episode']['name'], 'next-link' : Base_Url+json_data['episode']['next']['slug'], 'status': json_data['anime']['status'], 'json-data': json_data}
