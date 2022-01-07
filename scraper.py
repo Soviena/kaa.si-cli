@@ -14,7 +14,7 @@ def vidstreaming(url):
     player = soup.find('script', text=re.compile("player.on"))
     jw_link = re.search(r"{ w.*",str(player)).group()
     print("Getting link...")
-    jw_link = "https://gogoplay1.com/download?"+re.findall(r'(id.*)\'',jw_link)[0]
+    jw_link = "https://gogoplay.io/download?"+re.findall(r'(id.*)\'',jw_link)[0]
     try:
         soup = parse_web(jw_link)
         print(jw_link)
