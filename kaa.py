@@ -1,9 +1,4 @@
-from pypresence import Presence
-import cloudscraper
-import time
-from bs4 import BeautifulSoup
 import re, json
-import base64, os
 import scraper
 
 Base_Url = "https://www2.kickassanime.ro/"
@@ -19,7 +14,7 @@ def search_anime(query):
     js = parse_appData(Base_Url+Search_Url+query)
     if ((not ("animes" in js)) or (len(js['animes']) == 0)):
         print("not found")
-        return
+        return None
     return js['animes']
 
 def recently_uploaded():

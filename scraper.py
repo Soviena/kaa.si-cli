@@ -1,9 +1,12 @@
-import cloudscraper, re, base64
+import cloudscraper, re, base64, requests
 from bs4 import BeautifulSoup
 
 def parse_web(url):
-    scraper = cloudscraper.create_scraper()
-    page = scraper.get(url).text
+    try:
+        scraper = cloudscraper.create_scraper()
+        page = scraper.get(url).content
+    except:
+        page = requests.get(url).content
     return BeautifulSoup(page, "html.parser")
 
 def vidstreaming(url):
@@ -11,9 +14,10 @@ def vidstreaming(url):
     player = soup.find('script', text=re.compile("player.on"))
     jw_link = re.search(r"{ w.*",str(player)).group()
     print("Getting link...")
-    jw_link = "https://gogoplay1.com/download?"+re.findall(r'(id.*)',jw_link)[0]
+    jw_link = "https://gogoplay1.com/download?"+re.findall(r'(id.*)\'',jw_link)[0]
     try:
-        soup = parse_web(jw_link, True)
+        soup = parse_web(jw_link)
+        print(jw_link)
         Vlink = soup.find_all('a')
         for i in range(len(Vlink)):
             if "vidstreaming" in str(Vlink[i]['href']):

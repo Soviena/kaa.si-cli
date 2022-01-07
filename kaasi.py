@@ -160,14 +160,19 @@ while True:
 
     elif query in ('A','a'):
         animes = kaa.recently_uploaded()
-        outputAnime(animes)
         animeLink = selectAnime(animes)
+        episodeData = kaa.select_episode(animeLink)
+        embedVideoLink = kaa.check_link(episodeData)
 
     else:
         animes = kaa.search_anime(query)
-        outputAnime(animes)
-        animeLink = selectAnime(animes)
-        x = -1
+        if animes != None:
+            animeLink = selectAnime(animes)
+            episodeData = kaa.select_episode(animeLink)
+            embedVideoLink = kaa.check_link(episodeData)
+            x = -1
+        else:
+            x = 0
 
     while x != 0:
         if "gogoplay1.com" in str(embedVideoLink):
