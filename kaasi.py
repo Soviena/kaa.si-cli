@@ -41,21 +41,32 @@ mediaPlayer = 'mpv' # Change this to your desired media player
 def vidstreaming(url,json_data):
     soup = parse_web(url)
     player = soup.find('script', text=re.compile("player.on"))
-    jw_link = re.search(r"{ w.*",str(player)).group()
+    jw_link = re.findall(r"'([http|\/].*)'",re.findall(r"{ w.*",str(player))[0])[0]
+    if "http" not in jw_link:
+        jw_link = "https:"+jw_link
     print("Getting link...")
-    jw_link = "https://gogoplay.io/download?"+re.findall(r'(id.*)',jw_link)[0]
+    soup = parse_web(jw_link, True)
+    soup = soup.findAll('li', class_="linkserver")
+    for i in soup:
+        if "sbplay2" in str(i['data-video']):
+            jw_link = i['data-video']
+    jw_link = jw_link.replace("/e/","/d/")
     try:
-        soup = parse_web(jw_link, True)
-        Vlink = soup.find_all('a')
-        for i in range(len(Vlink)):
-            if "vidstreaming" in str(Vlink[i]['href']):
-                print("[{}]".format(i),re.findall(r'(\d*P)',Vlink[i].text)[0])
-        x = int(input("Select quality : "))
+        soup = parse_web(jw_link)
+        soup = soup.findAll('a', text=re.compile("quality")) 
+        x = input("Quality High 1080 - Normal 720 - Low 360\nSelect quality [h/n/l] : ")
+        if x not in ('h','n','l'):
+            x = 'h'
+        hash = re.findall(r"'([1234567890\-abcdef]*)'",soup[0]['onclick'])[0]
+        id = re.findall(r"d\/(.*)",jw_link)[0]
+        soup = parse_web("https://sbplay2.com/dl?op=download_orig&id={id}&mode={quality}&hash={hash}".format(id=id, quality=x, hash=hash))
+        Vlink = soup.find('a', text=re.compile("Direct Download Link"))['href']
+        jw_link = "https://gogoplay.io/download?"+re.findall(r'(id.*)\'',jw_link)[0]
     except:
         x = input("Error occured, try again ? [y/n]: ")
         if x=='n' : return "Cancelled"
         return vidstreaming(url,json_data)
-    return play_vid(Vlink[x]['href'],json_data)
+    return play_vid(Vlink,json_data)
 
 def play_vid(link,json_data):
     if dcrpc:
