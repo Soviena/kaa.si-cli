@@ -1,8 +1,19 @@
+from pypresence import Presence
 import cloudscraper
+import time
 from bs4 import BeautifulSoup
 import requests as s
 import re, json
 import base64, os
+
+dcrpc = False;
+try:
+    client_id = "926022094976852038"  # Enter your Application ID here.
+    RPC = Presence(client_id=client_id)
+    RPC.connect()
+    dcrpc = True
+except:
+    print("Can't Connect to discord")
 
 Base_Url = "https://www2.kickassanime.ro/"
 watch_history = {'anime' : {}, 'last' : {}}
@@ -22,29 +33,51 @@ except:
     with open('./h.txt','w',encoding='utf-8') as histo:
         histo.write(str(watch_history))
 
+# connect with anilist ?
+# connect with my anime list ?
+
+mediaPlayer = 'mpv' # Change this to your desired media player
+
 def vidstreaming(url,json_data):
     soup = parse_web(url)
     player = soup.find('script', text=re.compile("player.on"))
-    jw_link = re.search(r"{ w.*",str(player)).group()
+    jw_link = re.findall(r"'([http|\/].*)'",re.findall(r"{ w.*",str(player))[0])[0]
+    if "http" not in jw_link:
+        jw_link = "https:"+jw_link
     print("Getting link...")
-    jw_link = "https://gogoplay1.com/download?"+re.findall(r'(id.*)',jw_link)[0]
+    soup = parse_web(jw_link, True)
+    soup = soup.findAll('li', class_="linkserver")
+    for i in soup:
+        if "sbplay2" in str(i['data-video']):
+            jw_link = i['data-video']
+    jw_link = jw_link.replace("/e/","/d/")
     try:
-        soup = parse_web(jw_link, True)
-        Vlink = soup.find_all('a')
-        for i in range(len(Vlink)):
-            if "vidstreaming" in str(Vlink[i]['href']):
-                print("[{}]".format(i),re.findall(r'(\d*P)',Vlink[i].text)[0])
-        x = int(input("Select quality : "))
+        soup = parse_web(jw_link)
+        soup = soup.findAll('a', text=re.compile("quality")) 
+        x = input("Quality High 1080 - Normal 720 - Low 360\nSelect quality [h/n/l] : ")
+        if x not in ('h','n','l'):
+            x = 'h'
+        hash = re.findall(r"'([1234567890\-abcdef]*)'",soup[0]['onclick'])[0]
+        id = re.findall(r"d\/(.*)",jw_link)[0]
+        soup = parse_web("https://sbplay2.com/dl?op=download_orig&id={id}&mode={quality}&hash={hash}".format(id=id, quality=x, hash=hash))
+        Vlink = soup.find('a', text=re.compile("Direct Download Link"))['href']
     except:
         x = input("Error occured, try again ? [y/n]: ")
         if x=='n' : return "Cancelled"
         return vidstreaming(url,json_data)
-    return play_vid(Vlink[x]['href'],json_data)
+    return play_vid(Vlink,json_data)
 
-def play_vid(link,json_data,player='mpv'):
+def play_vid(link,json_data):
+    if dcrpc:
+        try:
+            RPC.update(state=json_data['anime']['name'] + " ("+ re.findall(r' (\d*)',json_data['episode']['name'])[0] +" of "+str(len(json_data['episodes'])) + ")", details="Watching anime", start=time.time())
+        except:
+            RPC.update(state=json_data['anime']['name'], details="Watching anime", start=time.time())
     print('Trying to play video...')
     link = link.replace('\\','')
-    os.system('am start --user 0 -a android.intent.action.VIEW -d "{link}" -n is.xyz.mpv/.MPVActivity'.format(link=link))
+    # uncomment for termux
+    #os.system('am start --user 0 -a android.intent.action.VIEW -d "{link}" -n is.xyz.mpv/.MPVActivity'.format(link=link))
+    os.system('{pl} "{link}"'.format(pl=mediaPlayer,link=link))
     try :
         watch_history['anime'][json_data['anime']['name']] = {'label' : json_data['episode']['name'], 'next-link' : Base_Url+json_data['episode']['next']['slug'], 'status': json_data['anime']['status'], 'json-data': json_data}
         watch_history['last'] = {'name' : json_data['anime']['name'] ,'episode-label' : json_data['episode']['name'], 'next-link' : Base_Url+json_data['episode']['next']['slug'], 'status': json_data['anime']['status'], 'json-data': json_data}
@@ -193,6 +226,8 @@ def decode_base64(text,lossless=False):
     return message_bytes.decode('ascii')
 
 def main_menu():
+    if dcrpc:
+        RPC.update(state="In Main Menu", details="Browsing anime")
     print(logo+"\033[93mtype H for history\ntype R to resume watching\ntype A to see rencently uploaded\n\033[1mOr just type the anime title to search\033[0m\n")
     query = input("\033[4m\033[92mInput\033[0m : ")
     if query in ('H','h'):
@@ -203,7 +238,6 @@ def main_menu():
         return recently_uploaded()        
     else:
         return search_anime(query)
-    return exit()
 
 def history(histo):
     animes_v = list(histo['anime'].values())
@@ -260,7 +294,10 @@ def recently_uploaded():
     soup = parse_web(Base_Url)
     js = parse_appData(soup)
     for i in range(len(js['animeList']['sub'])):
-        print('[{num}]'.format(num=i),js['animeList']['sub'][i]['name']+" Episode "+js['animeList']['sub'][i]['episode'])
+        if i%2==0:
+            print('\033[96m[{num}]'.format(num=i),js['animeList']['sub'][i]['name']+" Episode "+js['animeList']['sub'][i]['episode']+"\033[0m")
+        else:
+            print('\033[92m[{num}]'.format(num=i),js['animeList']['sub'][i]['name']+" Episode "+js['animeList']['sub'][i]['episode']+"\033[0m")            
     x = int(input("input : "))
     soup = parse_web(Base_Url+js['animeList']['sub'][x]['slug'])
     js = parse_appData(soup)
