@@ -172,6 +172,7 @@ while True:
         else:
             try:
                 x = int(x)
+                animeLink = re.findall(r"(.*)\/episode",animes_v[x]['episodeLink'])[0]
                 if animes_v[x]['status'] == 'Finished Airing' and animes_v[x]['next-link'] == '':
                     print('The anime is finished airing and no next episode')
                     x = 0
@@ -193,6 +194,7 @@ while True:
 
     elif query in ('R','r'):
         print('Last session :',watch_history['last']['name'],watch_history['last']['episode-label'])
+        animeLink = re.findall(r"(.*)\/episode",watch_history['last']['episodeLink'])[0]
         if watch_history['last']['status'] == 'Finished Airing' and watch_history['last']['next-link'] == '': 
             print('The anime is finished airing and no next episode' )
         elif watch_history['last']['next-link'] == '':
