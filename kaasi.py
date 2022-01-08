@@ -32,8 +32,7 @@ def firstSetup():
             if setup['anilist']:
                 setup['username'] = input('Anilist Username : ')
                 setup['auto'] = input("Auto update anilist after watching anime ? [y/n] : ") in ('y','Y')
-                token = anilist.login
-                setup['token'] = token
+                setup['token'] = anilist.login()
             config.write(str(setup))
             return setup
 
@@ -67,6 +66,8 @@ def play_vid(link,epsData):
     #os.system('am start --user 0 -a android.intent.action.VIEW -d "{link}" -n is.xyz.mpv/.MPVActivity'.format(link=link))
     os.system('{pl} "{link}"'.format(pl=cfg['player'],link=link))
     updateWatchHistory(epsData)
+    if cfg['anilist']:
+        pass
 
 def selectAnime(animeList):
     outputAnime(animeList)
