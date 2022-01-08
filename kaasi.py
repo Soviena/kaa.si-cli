@@ -46,12 +46,12 @@ def outputAnime(animeList):
 def updateWatchHistory(epsData):
     epsLink = str(kaa.Base_Url+epsData['anime']['slug']+"/"+epsData['episode']['slug']+'-'+epsData['episode']['slug_id']).replace("\\","")
     try :
-        watch_history['anime'][epsData['anime']['name']] = {'label' : epsData['episode']['name'], 'next-link' : kaa.Base_Url+epsData['episode']['next']['slug'], 'episodeLink' : epsLink}
-        watch_history['last'] = {'name' : epsData['anime']['name'] ,'episode-label' : epsData['episode']['name'], 'next-link' : kaa.Base_Url+epsData['episode']['next']['slug'], 'episodeLink' : epsLink}
+        watch_history['anime'][epsData['anime']['name']] = {'label' : epsData['episode']['name'], 'next-link' : kaa.Base_Url+epsData['episode']['next']['slug'], 'episodeLink' : epsLink, 'status': epsData['anime']['status']}
+        watch_history['last'] = {'name' : epsData['anime']['name'] ,'episode-label' : epsData['episode']['name'], 'next-link' : kaa.Base_Url+epsData['episode']['next']['slug'], 'episodeLink' : epsLink, 'status' : epsData['anime']['status']}
     except :
-        watch_history['anime'][epsData['anime']['name']] = {'label' : epsData['episode']['name'], 'next-link' : '', 'episodeLink' : epsLink}
-        watch_history['last'] = {'name' : epsData['anime']['name'] ,'episode-label' : epsData['episode']['name'], 'next-link' : '', 'episodeLink' : epsLink}
-    with open('h.txt','w',encoding='utf-8') as histo:
+        watch_history['anime'][epsData['anime']['name']] = {'label' : epsData['episode']['name'], 'next-link' : '', 'episodeLink' : epsLink, 'status' : epsData['anime']['status']}
+        watch_history['last'] = {'name' : epsData['anime']['name'] ,'episode-label' : epsData['episode']['name'], 'next-link' : '', 'episodeLink' : epsLink, 'status' : epsData['anime']['status']}
+    with open('history.txt','w',encoding='utf-8') as histo:
         histo.write(str(watch_history))
 
 def play_vid(link,epsData):
@@ -98,7 +98,6 @@ while True:
         RPC.update(state="In Main Menu", details="Browsing anime")
     print(logo+"\033[93mtype H for history\ntype R to resume watching\ntype A to see rencently uploaded\n\033[1mOr just type the anime title to search\033[0m\n")
     query = input("\033[4m\033[92mInput\033[0m : ")
-
     if query in ('H','h'):
         animes_v = list(watch_history['anime'].values())
         animes_k = list(watch_history['anime'].keys())
@@ -106,7 +105,7 @@ while True:
             if i%2 == 0:
                 print('\033[96m[{i}] {anime} {episode}'.format(i=i, anime=animes_k[i], episode=animes_v[i]['label']), end=' ')
             else:
-                print('\033[92m[{i}] {anime} {episode}'.format(i=i, anime=animes_k[i], episode=animes_v[i]['label']), end=' ')            
+                print('\033[92m[{i}] {anime} {episode}'.format(i=i, anime=animes_k[i], episode=animes_v[i]['label']), end=' ')
             if animes_v[i]['next-link'] == '' and animes_v[i]['status'] == 'Finished Airing':
                 print('Finished',end='')
             print('\033[0m')
@@ -147,7 +146,7 @@ while True:
         if watch_history['last']['status'] == 'Finished Airing' and watch_history['last']['next-link'] == '': 
             print('The anime is finished airing and no next episode' )
         elif watch_history['last']['next-link'] == '':
-            episodeData = kaa.parse_appData(animes_v['last']['episodeLink'])
+            episodeData = kaa.parse_appData(watch_history['last']['episodeLink'])
             if episodeData['episode']['next'] == None:
                 print('not yet updated' )
             else:
@@ -161,8 +160,10 @@ while True:
     elif query in ('A','a'):
         animes = kaa.recently_uploaded()
         animeLink = selectAnime(animes)
-        episodeData = kaa.select_episode(animeLink)
+        episodeData = kaa.parse_appData(animeLink)
+        animeLink = re.findall(r"(.*)\/episode",animeLink)[0]
         embedVideoLink = kaa.check_link(episodeData)
+        x = -1
 
     else:
         animes = kaa.search_anime(query)
@@ -179,7 +180,10 @@ while True:
             videoLink = scraper.vidstreaming(embedVideoLink)
         else:
             videoLink = scraper.bestremo(episodeData)
-        play_vid(videoLink,episodeData)
+        try:
+            play_vid(videoLink,episodeData)
+        except:
+            print("Some error occurred!")
         print("[1] Next episode\n[2] Play again\n[3] Select episode\n[0] Back to menu")
         x = int(input("Input : "))
         if x == 1 :
