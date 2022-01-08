@@ -23,11 +23,12 @@ def firstSetup():
     except:
         with open('./kaasi.txt','w',encoding='utf-8') as config:
             setup = {}
-            print("First time setup :")
+            print("First time setup")
             if int(input("Preferred media player :\n[1] MPV\n[2] VLC\nInput : ")) == 1 :
                 setup['player'] = "mpv"
             else :
                 setup['player'] = "vlc"
+            setup['termux'] = input("Are you using Termux ? [y/n] : ") in ('Y','y')
             setup['anilist'] = input("Login with anilist ? [y/n] : ") in ('y','Y')
             if setup['anilist']:
                 setup['username'] = input('Anilist Username : ')
@@ -62,9 +63,13 @@ def play_vid(link,epsData):
             RPC.update(state=epsData['anime']['name'], details="Watching anime", start=time.time())
     print('Trying to play video...')
     link = link.replace('\\','')
-    # uncomment for termux
-    #os.system('am start --user 0 -a android.intent.action.VIEW -d "{link}" -n is.xyz.mpv/.MPVActivity'.format(link=link))
-    os.system('{pl} "{link}"'.format(pl=cfg['player'],link=link))
+    if cfg['termux']:
+        if cfg['player'] == "mpv":
+            os.system('am start --user 0 -a android.intent.action.VIEW -d "{link}" -n is.xyz.mpv/.MPVActivity'.format(link=link))
+        else:
+            os.system('am start --user 0 -a android.intent.action.VIEW -d "{link}" -n org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity'.format(link=link))
+    else:
+        os.system('{pl} "{link}"'.format(pl=cfg['player'],link=link))
     updateWatchHistory(epsData)
     if cfg['anilist']:
         pass
