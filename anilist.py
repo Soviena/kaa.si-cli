@@ -5,10 +5,8 @@ url = 'https://graphql.anilist.co'
 
 def login():
     print("LOGIN WITH ANILIST")
-    try:
-        os.system(r'open "https://anilist.co/api/v2/oauth/authorize?client_id=7201&response_type=token"')
-    except:
-        print("Open this url in the browser:\nhttps://anilist.co/api/v2/oauth/authorize?client_id=7201&response_type=token")
+    os.system(r'open "https://anilist.co/api/v2/oauth/authorize?client_id=7201&response_type=token"')
+    print("Open this url in the browser:\nhttps://anilist.co/api/v2/oauth/authorize?client_id=7201&response_type=token")
     return input("Paste token here : ")
 
 def saveMediaListEntry(id,token,status,episode):
