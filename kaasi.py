@@ -55,6 +55,41 @@ def updateWatchHistory(epsData):
     with open('history.txt','w',encoding='utf-8') as histo:
         histo.write(str(watch_history))
 
+def updateAnilist(epsData):
+    if epsData['anime']['en_title'] != None:
+        q = anilist.searchAnime(epsData['anime']['en_title'])
+        if q.status_code == 404:
+            q = anilist.searchAnime(epsData['anime']['name'])
+    else:
+        q = anilist.searchAnime(epsData['anime']['name'])
+    id = eval(q.content)['data']['Media']['id']
+    episode = int(re.findall(r"\s(\d*)",epsData['episode']['name'])[0])
+    if epsData['episode']['next'] == None and epsData['anime']['status'] == "Finished Airing":
+        status = 'COMPLETED'
+    else:
+        status = 'CURRENT'
+    response = anilist.saveMediaListEntry(id,cfg['token'],status,episode)
+    if response.status_code == 200:
+        print("Anilist updated")
+    else:
+        print("Could not update anilist")
+        print(response.content)
+
+def fetchAnilist():
+    x = eval(anilist.getListOfAnime(cfg['username'],'CURRENT'))
+    for i in x['data']['MediaListCollection']['lists'][0]['entries']:
+        print("Fetching",i['media']['title']['romaji'])
+        anime = kaa.search_anime(i['media']['title']['romaji'])
+        if anime == None:
+            anime = kaa.search_anime(i['media']['title']['english'])
+        if anime == None:
+            print("CANT FIND",i['media']['title']['romaji'])
+        else:
+            progress = i['progress']
+            animeLink = kaa.Base_Url+anime[0]['slug']
+            epsData = kaa.select_episode(animeLink,True,progress)
+            updateWatchHistory(epsData)
+
 def play_vid(link,epsData):
     if dcrpc:
         try:
@@ -72,7 +107,11 @@ def play_vid(link,epsData):
         os.system('{pl} "{link}"'.format(pl=cfg['player'],link=link))
     updateWatchHistory(epsData)
     if cfg['anilist']:
-        pass
+        if cfg['auto']:
+            updateAnilist(epsData)
+        else:
+            if input("Update anilist progress ? [y/n] : ") in ('Y','y'):
+                updateAnilist(epsData)
 
 def selectAnime(animeList):
     outputAnime(animeList)
@@ -124,7 +163,11 @@ while True:
             print("Finished anime is deleted from history")
             x = 0
         elif x in ('S','s'):
-            pass # Sync with anilist
+            try:
+                fetchAnilist()
+                print("SYNCED!")
+            except:
+                print("ERROR OCCURRED!")
             x = 0
         else:
             try:

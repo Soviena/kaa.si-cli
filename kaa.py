@@ -13,7 +13,6 @@ def search_anime(query):
     Search_Url = "search?q="
     js = parse_appData(Base_Url+Search_Url+query)
     if ((not ("animes" in js)) or (len(js['animes']) == 0)):
-        print("not found")
         return None
     return js['animes']
 
@@ -21,9 +20,12 @@ def recently_uploaded():
     js = parse_appData(Base_Url)
     return js['animeList']['sub']
 
-def select_episode(link):
+def select_episode(link,direct=False,eps=None):
     episodes = parse_appData(link)['anime']['episodes']
-    x = int(input("Select episode [1-{episode}] : ".format(episode=len(episodes))))
+    if direct:
+        x = eps # NOT RELIABLE BECAUSE SOME ANIME HAVE 0 EPISODE IN THE LIST!
+    else:
+        x = int(input("Select episode [1-{episode}] : ".format(episode=len(episodes))))
     return parse_appData(Base_Url+episodes[len(episodes)-x]['slug'])
 
 def check_link(js):

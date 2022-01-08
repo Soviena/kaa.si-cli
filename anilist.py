@@ -5,11 +5,13 @@ url = 'https://graphql.anilist.co'
 
 def login():
     print("LOGIN WITH ANILIST")
-    os.system(r'open "https://anilist.co/api/v2/oauth/authorize?client_id=7201&response_type=token"')
+    try:
+        os.system(r'open "https://anilist.co/api/v2/oauth/authorize?client_id=7201&response_type=token"')
+    except:
+        print("Open this url in the browser:\nhttps://anilist.co/api/v2/oauth/authorize?client_id=7201&response_type=token")
     return input("Paste token here : ")
 
-def saveMediaListEntry(title,token,status,episode):
-    mediaId = int(eval(searchAnime(title).content)['data']['Media']['id'])
+def saveMediaListEntry(id,token,status,episode):
     query = """
     mutation ($mediaId: Int, $status: MediaListStatus, $episode : Int) {
         SaveMediaListEntry (mediaId: $mediaId, status: $status, progress : $episode) {
@@ -24,7 +26,7 @@ def saveMediaListEntry(title,token,status,episode):
     }
     """
     var = {
-        "mediaId" : mediaId,
+        "mediaId" : id,
         "status" : status,
         "episode" : episode
     }
@@ -61,6 +63,7 @@ def getListOfAnime(user,status):
                                 userPreferred
                             }
                         }
+                        progress
                     }
                 }
             } 
