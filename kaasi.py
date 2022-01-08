@@ -61,7 +61,6 @@ def vidstreaming(url,json_data):
         id = re.findall(r"d\/(.*)",jw_link)[0]
         soup = parse_web("https://sbplay2.com/dl?op=download_orig&id={id}&mode={quality}&hash={hash}".format(id=id, quality=x, hash=hash))
         Vlink = soup.find('a', text=re.compile("Direct Download Link"))['href']
-        jw_link = "https://gogoplay.io/download?"+re.findall(r'(id.*)\'',jw_link)[0]
     except:
         x = input("Error occured, try again ? [y/n]: ")
         if x=='n' : return "Cancelled"
