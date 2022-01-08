@@ -32,7 +32,8 @@ def firstSetup():
             if setup['anilist']:
                 setup['username'] = input('Anilist Username : ')
                 setup['auto'] = input("Auto update anilist after watching anime ? [y/n] : ") in ('y','Y')
-                setup['token'] = anilist.login
+                token = anilist.login
+                setup['token'] = token
             config.write(str(setup))
             return setup
 
