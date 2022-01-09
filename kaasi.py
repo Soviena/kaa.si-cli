@@ -76,23 +76,23 @@ def updateAnilist(epsData):
         print(response.content)
 
 def fetchAnilist():
-    i = 0
+    j = 0
     x = eval(anilist.getListOfAnime(cfg['username'],'CURRENT'))
     for i in x['data']['MediaListCollection']['lists'][0]['entries']:
-        print("Fetching",i['media']['title']['romaji'])
+        print("\033[94mFetching",i['media']['title']['romaji'],"\033[0m")
         anime = kaa.search_anime(i['media']['title']['romaji'])
         if anime == None:
             anime = kaa.search_anime(i['media']['title']['english'])
         if anime == None:
-            print("CANT FIND",i['media']['title']['romaji'],"episode",i['progress'])
-            i+=1
+            print("\033[91mCANT FIND",i['media']['title']['romaji'],"episode",i['progress'],"\033[0m")
+            j+=1
         else:
             progress = i['progress']
             animeLink = kaa.Base_Url+anime[0]['slug']
             epsData = kaa.select_episode(animeLink,True,progress)
             updateWatchHistory(epsData)
-    if i>0 :
-        print(i,"anime's failed to sync!!")
+    if j>0 :
+        print("\033[91m",j,"anime's failed to sync!!\033[0m")
 
 def play_vid(link,epsData):
     if dcrpc:
@@ -146,7 +146,7 @@ except:
 while True:
     if dcrpc:
         RPC.update(state="In Main Menu", details="Browsing anime")
-    print(logo+"\033[93mtype H for history\ntype R to resume watching\ntype A to see rencently uploaded\n\033[1mOr just type the anime title to search\033[0m\n")
+    print(logo+"\033[93mtype H for history\ntype R to resume watching\ntype A to see rencently uploaded\n\033[1mor just type the anime title to search\033[0m\n")
     query = input("\033[4m\033[92mInput\033[0m : ")
     if query in ('H','h'):
         animes_v = list(watch_history['anime'].values())
@@ -159,7 +159,7 @@ while True:
             if animes_v[i]['next-link'] == '' and animes_v[i]['status'] == 'Finished Airing':
                 print('Finished',end='')
             print('\033[0m')
-        x = input('[D] to delete finished anime\n[S] to sync with anilist\nSelect anime to resume watching : ')
+        x = input('\n[D] to delete finished anime\n[S] to sync with anilist\nSelect anime to resume watching : ')
         if x in ('D','d'):
             for i in range(len(animes_k)):
                 if animes_v[i]['next-link'] == '' and animes_v[i]['status'] == 'Finished Airing':
@@ -167,11 +167,11 @@ while True:
             print("Finished anime is deleted from history")
             x = 0
         elif x in ('S','s'):
-            try:
-                fetchAnilist()
-                print("SYNCED!")
-            except:
-                print("ERROR OCCURRED!")
+            # try:
+            fetchAnilist()
+            print("SYNCED!")
+            # except:
+            #     print("ERROR OCCURRED!")
             x = 0
         else:
             try:
