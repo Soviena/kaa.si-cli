@@ -76,6 +76,7 @@ def updateAnilist(epsData):
         print(response.content)
 
 def fetchAnilist():
+    i = 0
     x = eval(anilist.getListOfAnime(cfg['username'],'CURRENT'))
     for i in x['data']['MediaListCollection']['lists'][0]['entries']:
         print("Fetching",i['media']['title']['romaji'])
@@ -83,12 +84,15 @@ def fetchAnilist():
         if anime == None:
             anime = kaa.search_anime(i['media']['title']['english'])
         if anime == None:
-            print("CANT FIND",i['media']['title']['romaji'])
+            print("CANT FIND",i['media']['title']['romaji'],"episode",i['progress'])
+            i+=1
         else:
             progress = i['progress']
             animeLink = kaa.Base_Url+anime[0]['slug']
             epsData = kaa.select_episode(animeLink,True,progress)
             updateWatchHistory(epsData)
+    if i>0 :
+        print(i,"anime's failed to sync!!")
 
 def play_vid(link,epsData):
     if dcrpc:
