@@ -64,7 +64,7 @@ def updateAnilist(epsData):
         q = anilist.searchAnime(epsData['anime']['name'])
     id = eval(q.content)['data']['Media']['id']
     episode = int(re.findall(r"\s(\d*)",epsData['episode']['name'])[0])
-    if epsData['episode']['next'] == None and epsData['anime']['status'] == "Finished Airing":
+    if epsData['episode']['next'] == None and epsData['anime']['status'] in ("Finished Airing","Completed"):
         status = 'COMPLETED'
     else:
         status = 'CURRENT'
@@ -156,13 +156,13 @@ while True:
                 print('\033[96m[{i}] {anime} {episode}'.format(i=i, anime=animes_k[i], episode=animes_v[i]['label']), end=' ')
             else:
                 print('\033[92m[{i}] {anime} {episode}'.format(i=i, anime=animes_k[i], episode=animes_v[i]['label']), end=' ')
-            if animes_v[i]['next-link'] == '' and animes_v[i]['status'] == 'Finished Airing':
+            if animes_v[i]['next-link'] == '' and animes_v[i]['status'] in ("Finished Airing","Completed"):
                 print('Finished',end='')
             print('\033[0m')
         x = input('\n[D] to delete finished anime\n[S] to sync with anilist\nSelect anime to resume watching : ')
         if x in ('D','d'):
             for i in range(len(animes_k)):
-                if animes_v[i]['next-link'] == '' and animes_v[i]['status'] == 'Finished Airing':
+                if animes_v[i]['next-link'] == '' and animes_v[i]['status'] in ("Finished Airing","Completed"):
                     watch_history['anime'].pop(animes_k[i])    
             print("Finished anime is deleted from history")
             x = 0
@@ -177,7 +177,7 @@ while True:
             try:
                 x = int(x)
                 animeLink = re.findall(r"(.*)\/episode",animes_v[x]['episodeLink'])[0]
-                if animes_v[x]['status'] == 'Finished Airing' and animes_v[x]['next-link'] == '':
+                if animes_v[x]['status'] in ("Finished Airing","Completed") and animes_v[x]['next-link'] == '':
                     print('The anime is finished airing and no next episode')
                     x = 0
                 elif animes_v[x]['next-link'] == '':
@@ -199,7 +199,7 @@ while True:
     elif query in ('R','r'):
         print('Last session :',watch_history['last']['name'],watch_history['last']['episode-label'])
         animeLink = re.findall(r"(.*)\/episode",watch_history['last']['episodeLink'])[0]
-        if watch_history['last']['status'] == 'Finished Airing' and watch_history['last']['next-link'] == '': 
+        if watch_history['last']['status'] == ("Finished Airing","Completed") and watch_history['last']['next-link'] == '': 
             print('The anime is finished airing and no next episode' )
         elif watch_history['last']['next-link'] == '':
             episodeData = kaa.parse_appData(watch_history['last']['episodeLink'])
