@@ -167,11 +167,11 @@ while True:
             print("Finished anime is deleted from history")
             x = 0
         elif x in ('S','s'):
-            # try:
-            fetchAnilist()
-            print("SYNCED!")
-            # except:
-            #     print("ERROR OCCURRED!")
+            try:
+                fetchAnilist()
+                print("SYNCED!")
+            except:
+                print("\n\033[91mCANT CONNECT TO ANILIST!\033[0m\n")
             x = 0
         else:
             try:
