@@ -52,12 +52,12 @@ def updateWatchHistory(epsData,anilist=None):
     except :
         watch_history['anime'][epsData['anime']['name']] = {'label' : epsData['episode']['name'], 'next-link' : '', 'episodeLink' : epsLink, 'status' : epsData['anime']['status']}
         watch_history['last'] = {'name' : epsData['anime']['name'] ,'episode-label' : epsData['episode']['name'], 'next-link' : '', 'episodeLink' : epsLink, 'status' : epsData['anime']['status']}
-    if cfg['anilist']:
+    if anilist != None:
         watch_history['anime'][epsData['anime']['name']]['mediaId'] = anilist['media']['id']
         watch_history['last']['mediaId'] = anilist['media']['id']
         if epsData['anime']['status'] == "Currently Airing" and anilist['media']['status'] in ('RELEASING','NOT_YET_RELEASED'):
             watch_history['airing'][epsData['anime']['name']] = watch_history['anime'][epsData['anime']['name']]
-    else:
+    elif epsData['anime']['status'] == "Currently Airing":
         watch_history['airing'][epsData['anime']['name']] = watch_history['anime'][epsData['anime']['name']]
     with open('history.txt','w',encoding='utf-8') as histo:
         histo.write(str(watch_history))
@@ -130,6 +130,7 @@ def play_vid(link,epsData):
             os.system('am start --user 0 -a android.intent.action.VIEW -d "{link}" -n org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity'.format(link=link))
     else:
         os.system('{pl} "{link}"'.format(pl=cfg['player'],link=link))
+    
     updateWatchHistory(epsData)
     if cfg['anilist']:
         if cfg['auto']:
@@ -263,8 +264,9 @@ while True:
             videoLink = scraper.vidstreaming(embedVideoLink)
         else:
             videoLink = scraper.bestremo(episodeData)
+        play_vid(videoLink,episodeData)
         try:
-            play_vid(videoLink,episodeData)
+            pass
         except:
             print("Some error occurred!")
         print("[1] Next episode\n[2] Play again\n[3] Select episode\n[0] Back to menu")
