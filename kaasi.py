@@ -55,7 +55,7 @@ def updateWatchHistory(epsData,anilist=None):
     if cfg['anilist']:
         watch_history['anime'][epsData['anime']['name']]['mediaId'] = anilist['media']['id']
         watch_history['last']['mediaId'] = anilist['media']['id']
-        if epsData['anime']['status'] == "Currently Airing" and anilist['media']['status'] == 'RELEASING':
+        if epsData['anime']['status'] == "Currently Airing" and anilist['media']['status'] in ('RELEASING','NOT_YET_RELEASED'):
             watch_history['airing'][epsData['anime']['name']] = watch_history['anime'][epsData['anime']['name']]
     else:
         watch_history['airing'][epsData['anime']['name']] = watch_history['anime'][epsData['anime']['name']]
@@ -177,10 +177,11 @@ while True:
             if animes_v[i]['next-link'] == '' and animes_v[i]['status'] in ("Finished Airing","Completed"):
                 print('\033[94mFinished',end='')
             elif animes_k[i] in airing_k:
-                print('\033[93mAiring ',end='')
                 next = kaa.parse_appData(animes_v[i]['episodeLink'])  
-                if next['episode']['next'] != None:
-                    print('\033[95mUPDATED!',end='')     
+                if next['anime']['status'] not in ("Finished Airing","Completed"):
+                    print('\033[93mAiring ',end='')
+                    if next['episode']['next'] != None:
+                        print('\033[95mUPDATED!',end='')
             print('\033[0m')
         x = input('\n[D] to delete finished anime\n[S] to sync with anilist\nSelect anime to resume watching : ')
         if x in ('D','d'):
