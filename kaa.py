@@ -1,5 +1,6 @@
 import re, json
 import scraper
+import anilist
 
 Base_Url = "https://www2.kickassanime.ro/"
 
@@ -15,6 +16,17 @@ def search_anime(query):
     if ((not ("animes" in js)) or (len(js['animes']) == 0)):
         return None
     return js['animes']
+
+def searchAnimefromAnilist(epsData):
+    if epsData['anime']['en_title'] != None:
+        q = anilist.searchAnime(epsData['anime']['en_title'])
+        if q.status_code == 404:
+            q = anilist.searchAnime(epsData['anime']['name'])
+    else:
+        q = anilist.searchAnime(epsData['anime']['name'])
+    q = eval(q.content)['data']
+    q['media'] = q['Media']
+    return q
 
 def recently_uploaded():
     js = parse_appData(Base_Url)

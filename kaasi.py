@@ -62,17 +62,11 @@ def updateWatchHistory(epsData,anilist=None):
     with open('history.txt','w',encoding='utf-8') as histo:
         histo.write(str(watch_history))
 
-def updateAnilist(epsData):
-    if epsData['anime']['en_title'] != None:
-        q = anilist.searchAnime(epsData['anime']['en_title'])
-        if q.status_code == 404:
-            q = anilist.searchAnime(epsData['anime']['name'])
-    else:
-        q = anilist.searchAnime(epsData['anime']['name'])
-    q = eval(q.content)['data']['Media']
-    id = q['id']
+def updateAnilist(epsData,ani):
+    ani = ani['Media']
+    id = ani['id']
     episode = int(re.findall(r"\s(\d*)",epsData['episode']['name'])[0])
-    if epsData['episode']['next'] == None and (epsData['anime']['status'] in ("Finished Airing","Completed") or q['status'] == 'FINISHED'):
+    if epsData['episode']['next'] == None and (epsData['anime']['status'] in ("Finished Airing","Completed") or ani['status'] == 'FINISHED'):
         status = 'COMPLETED'
     else:
         status = 'CURRENT'
@@ -130,14 +124,14 @@ def play_vid(link,epsData):
             os.system('am start --user 0 -a android.intent.action.VIEW -d "{link}" -n org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity'.format(link=link))
     else:
         os.system('{pl} "{link}"'.format(pl=cfg['player'],link=link))
-    
-    updateWatchHistory(epsData)
+    ani = kaa.searchAnimefromAnilist(epsData)
+    updateWatchHistory(epsData,ani)
     if cfg['anilist']:
         if cfg['auto']:
-            updateAnilist(epsData)
+            updateAnilist(epsData,ani)
         else:
             if input("Update anilist progress ? [y/n] : ") in ('Y','y'):
-                updateAnilist(epsData)
+                updateAnilist(epsData,ani)
 
 
 #MAIN PROGRAM
@@ -183,6 +177,14 @@ while True:
                     print('\033[93mAiring ',end='')
                     if next['episode']['next'] != None:
                         print('\033[95mUPDATED!',end='')
+                    else:
+                        print("in ",end='')
+                        hour = (eval(anilist.searchAnimeId(animes_v[i]['mediaId']).content)['data']['Media']['nextAiringEpisode']['timeUntilAiring']//60)//60
+                        d = hour//24
+                        h = hour%24
+                        if d != 0:
+                            print(d,'day and',end=' ')
+                        print(h,'hour',end='')
             print('\033[0m')
         x = input('\n[D] to delete finished anime\n[S] to sync with anilist\nSelect anime to resume watching : ')
         if x in ('D','d'):

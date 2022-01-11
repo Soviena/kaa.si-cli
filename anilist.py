@@ -55,10 +55,32 @@ def searchAnime(title):
             }
             description
             status
+            nextAiringEpisode{
+                timeUntilAiring
+            }            
         }
         }
         """
     variable = {'title' : title}
+    return requests.post(url, json={'query': query, 'variables': variable})
+
+def searchAnimeId(id):
+    query = """
+        query ($id: Int) { 
+        Media (id: $id, type: ANIME){
+            title {
+                romaji
+                english
+            }
+            description
+            status
+            nextAiringEpisode{
+                timeUntilAiring
+            }
+        }
+        }
+        """
+    variable = {'id' : id}
     return requests.post(url, json={'query': query, 'variables': variable})
 
 def getListOfAnime(user,status):
