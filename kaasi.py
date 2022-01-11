@@ -31,9 +31,9 @@ def firstSetup():
             setup['termux'] = input("Are you using Termux ? [y/n] : ") in ('Y','y')
             setup['anilist'] = input("Login with anilist ? [y/n] : ") in ('y','Y')
             if setup['anilist']:
-                setup['username'] = input('Anilist Username : ')
-                setup['auto'] = input("Auto update anilist after watching anime ? [y/n] : ") in ('y','Y')
                 setup['token'] = anilist.login()
+                setup['auto'] = input("Auto update anilist after watching anime ? [y/n] : ") in ('y','Y')
+                setup['username'] = eval(anilist.getUserId(setup['token']).content)['data']['Viewer']['name']
             config.write(str(setup))
             return setup
 
@@ -44,7 +44,7 @@ def outputAnime(animeList):
         else:
             print("\033[92m[",i,"] ",animeList[i]['name'],"\033[0m")
 
-def updateWatchHistory(epsData):
+def updateWatchHistory(epsData,anilist=None):
     epsLink = str(kaa.Base_Url+epsData['anime']['slug']+"/"+epsData['episode']['slug']+'-'+epsData['episode']['slug_id']).replace("\\","")
     try :
         watch_history['anime'][epsData['anime']['name']] = {'label' : epsData['episode']['name'], 'next-link' : kaa.Base_Url+epsData['episode']['next']['slug'], 'episodeLink' : epsLink, 'status': epsData['anime']['status']}
@@ -52,6 +52,13 @@ def updateWatchHistory(epsData):
     except :
         watch_history['anime'][epsData['anime']['name']] = {'label' : epsData['episode']['name'], 'next-link' : '', 'episodeLink' : epsLink, 'status' : epsData['anime']['status']}
         watch_history['last'] = {'name' : epsData['anime']['name'] ,'episode-label' : epsData['episode']['name'], 'next-link' : '', 'episodeLink' : epsLink, 'status' : epsData['anime']['status']}
+    if cfg['anilist']:
+        watch_history['anime'][epsData['anime']['name']]['mediaId'] = anilist['media']['id']
+        watch_history['last']['mediaId'] = anilist['media']['id']
+        if epsData['anime']['status'] == "Currently Airing" and anilist['media']['status'] == 'RELEASING':
+            watch_history['airing'][epsData['anime']['name']] = watch_history['anime'][epsData['anime']['name']]
+    else:
+        watch_history['airing'][epsData['anime']['name']] = watch_history['anime'][epsData['anime']['name']]
     with open('history.txt','w',encoding='utf-8') as histo:
         histo.write(str(watch_history))
 
@@ -62,9 +69,10 @@ def updateAnilist(epsData):
             q = anilist.searchAnime(epsData['anime']['name'])
     else:
         q = anilist.searchAnime(epsData['anime']['name'])
-    id = eval(q.content)['data']['Media']['id']
+    q = eval(q.content)['data']['Media']
+    id = q['id']
     episode = int(re.findall(r"\s(\d*)",epsData['episode']['name'])[0])
-    if epsData['episode']['next'] == None and epsData['anime']['status'] in ("Finished Airing","Completed"):
+    if epsData['episode']['next'] == None and (epsData['anime']['status'] in ("Finished Airing","Completed") or q['status'] == 'FINISHED'):
         status = 'COMPLETED'
     else:
         status = 'CURRENT'
@@ -74,6 +82,11 @@ def updateAnilist(epsData):
     else:
         print("Could not update anilist")
         print(response.content)
+
+def selectAnime(animeList):
+    outputAnime(animeList)
+    x = int(input("\033[4m\033[92mInput\033[0m : "))
+    return kaa.Base_Url+animeList[x]['slug'] 
 
 def fetchAnilist():
     j = 0
@@ -85,12 +98,20 @@ def fetchAnilist():
             anime = kaa.search_anime(i['media']['title']['english'])
         if anime == None:
             print("\033[91mCANT FIND",i['media']['title']['romaji'],"episode",i['progress'],"\033[0m")
-            j+=1
+            animes = kaa.search_anime(input("Pls search manually, type the anime name : "))
+            try:
+                progress = i['progress']
+                animeLink = selectAnime(animes)
+                epsData = kaa.select_episode(animeLink,True,progress)
+                updateWatchHistory(epsData,i)
+            except:
+                print("\033[91mError ocurred !\033[0m")
+                j+=1
         else:
             progress = i['progress']
             animeLink = kaa.Base_Url+anime[0]['slug']
             epsData = kaa.select_episode(animeLink,True,progress)
-            updateWatchHistory(epsData)
+            updateWatchHistory(epsData,i)
     if j>0 :
         print("\033[91m",j,"anime's failed to sync!!\033[0m")
 
@@ -117,10 +138,6 @@ def play_vid(link,epsData):
             if input("Update anilist progress ? [y/n] : ") in ('Y','y'):
                 updateAnilist(epsData)
 
-def selectAnime(animeList):
-    outputAnime(animeList)
-    x = int(input("\033[4m\033[92mInput\033[0m : "))
-    return kaa.Base_Url+animes[x]['slug'] 
 
 #MAIN PROGRAM
 
@@ -135,7 +152,7 @@ except:
 
 cfg = firstSetup()
 
-watch_history = {'anime' : {}, 'last' : {}}
+watch_history = {'anime' : {}, 'last' : {}, 'airing' : {}}
 try:
     with open('./history.txt','r',encoding='utf-8') as histo:
         watch_history = eval(histo.read())
@@ -151,13 +168,19 @@ while True:
     if query in ('H','h'):
         animes_v = list(watch_history['anime'].values())
         animes_k = list(watch_history['anime'].keys())
+        airing_k = list(watch_history['airing'].keys())
         for i in range(len(animes_k)):
             if i%2 == 0:
                 print('\033[96m[{i}] {anime} {episode}'.format(i=i, anime=animes_k[i], episode=animes_v[i]['label']), end=' ')
             else:
                 print('\033[92m[{i}] {anime} {episode}'.format(i=i, anime=animes_k[i], episode=animes_v[i]['label']), end=' ')
             if animes_v[i]['next-link'] == '' and animes_v[i]['status'] in ("Finished Airing","Completed"):
-                print('Finished',end='')
+                print('\033[94mFinished',end='')
+            elif animes_k[i] in airing_k:
+                print('\033[93mAiring ',end='')
+                next = kaa.parse_appData(animes_v[i]['episodeLink'])  
+                if next['episode']['next'] != None:
+                    print('\033[95mUPDATED!',end='')     
             print('\033[0m')
         x = input('\n[D] to delete finished anime\n[S] to sync with anilist\nSelect anime to resume watching : ')
         if x in ('D','d'):
@@ -167,11 +190,14 @@ while True:
             print("Finished anime is deleted from history")
             x = 0
         elif x in ('S','s'):
-            try:
-                fetchAnilist()
-                print("SYNCED!")
-            except:
-                print("\n\033[91mCANT CONNECT TO ANILIST!\033[0m\n")
+            if cfg['anilist']:
+                try:
+                    fetchAnilist()
+                    print("SYNCED!")
+                except:
+                    print("\n\033[91mFAILED TO CONNECT TO ANILIST!\033[0m\n\nToo Many request or anilist API is down!\npls wait a few minutes and try again\n")
+            else:
+                print("NOT CONNECTED TO ANILIST")    
             x = 0
         else:
             try:

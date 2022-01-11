@@ -9,6 +9,18 @@ def login():
     print("Open this url in the browser:\nhttps://anilist.co/api/v2/oauth/authorize?client_id=7201&response_type=token")
     return input("Paste token here : ")
 
+def getUserId(token):
+    query = """
+        query { 
+            Viewer{
+                id
+                name
+            }
+        }
+    """    
+    header = {'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/json'}
+    return  requests.post('https://graphql.anilist.co',headers=header,json={'query' : query})
+
 def saveMediaListEntry(id,token,status,episode):
     query = """
     mutation ($mediaId: Int, $status: MediaListStatus, $episode : Int) {
@@ -42,6 +54,7 @@ def searchAnime(title):
                 english
             }
             description
+            status
         }
         }
         """
@@ -60,6 +73,8 @@ def getListOfAnime(user,status):
                                 english
                                 userPreferred
                             }
+                            status
+                            id
                         }
                         progress
                     }
