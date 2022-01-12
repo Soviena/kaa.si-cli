@@ -57,7 +57,7 @@ def sel_source(json_list):
     if j == 0 :
         raise Exception("No available source")
     x = int(input("Select source : "))
-    if json_list[i]['name'] == "A-KICKASSANIME":
+    if json_list[x]['name'] in ("A-KICKASSANIME","THETA-ORIGINAL"):
         return check_method(str(json_list[x]['src']).replace('\\',''),json_list)
     else:
         return s_pref_iframe(str(json_list[x]['src']).replace('\\',''),json_list)
@@ -81,7 +81,6 @@ def check_method(link,json_list):
     print('getting link...')
     soup = parse_web(link)
     player = soup.findAll('script')
-    #print(soup)
     for i in player:
         if 'Base64.decode' in str(i):
             enc = str(i)[str(i).find('Base64.decode("')+15:str(i).find('"))')]
