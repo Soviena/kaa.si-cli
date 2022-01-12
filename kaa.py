@@ -24,7 +24,8 @@ def searchAnimefromAnilist(epsData):
             q = anilist.searchAnime(epsData['anime']['name'])
     else:
         q = anilist.searchAnime(epsData['anime']['name'])
-    q = eval(q.content)['data']
+    q = q.content.replace(b'null',b'None')
+    q = eval(q)['data']
     q['media'] = q['Media']
     return q
 
