@@ -33,6 +33,4 @@ inspired by https://github.com/pystardust/ani-cli
 
 For android user, you can use termux to run this code! [Termux branch](https://github.com/Soviena/kaa.si-cli/tree/Termux)
 
-### working on theses features
-- Connect to anilist
 
