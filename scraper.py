@@ -69,15 +69,15 @@ def bestremo(js):
                 return vidstreaming(js['ext_servers'][i]['link'])
 
 def sel_source(json_list):
-    j = 0;
+    j = 0
     for i in range(len(json_list)):
         if not ((json_list[i]['name'] == "MAVERICKKI") or (json_list[i]['name'] == "BETAPLAYER")):
             print("[{num}] {source}".format(num=i,source=json_list[i]['name']))
-            j+=1;
+            j+=1
     if j == 0 :
         raise Exception("No available source")
     x = int(input("Select source : "))
-    if json_list[x]['name'] in ("A-KICKASSANIME","THETA-ORIGINAL"):
+    if json_list[x]['name'] in ("A-KICKASSANIME","THETA-ORIGINAL","PINK-BIRD","SAPPHIRE-DUCK"):
         return check_method(str(json_list[x]['src']).replace('\\',''),json_list)
     else:
         return s_pref_iframe(str(json_list[x]['src']).replace('\\',''),json_list)
@@ -96,6 +96,8 @@ def s_pref_iframe(link,json_list):
         return check_method(link[:link.find('embed.php')]+player['src'],json_list)
     elif 'player.php' in link:
         return check_method(link[:link.find('player.php')]+player['src'],json_list)
+    else:
+        raise Exception("IFRAME NOT FOUND")
 
 def check_method(link,json_list):
     print('getting link...')
