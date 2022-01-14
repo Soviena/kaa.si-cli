@@ -10,29 +10,27 @@ def parse_web(url):
     return BeautifulSoup(page, "html.parser")
 
 def vidstreaming(url):
+    try:
+        from requests_html import HTMLSession
+    except:
+        print("pls pip install requests_html. Vidstreaming currently cant support termux")
+        return None
     player = parse_web(url).find('script', text=re.compile("player.on"))
     jw_link = re.findall(r"'([http|\/].*)'",re.findall(r"{ w.*",str(player))[0])[0]
     if "http" not in jw_link:
         jw_link = "https:"+jw_link
     print("Getting link...")
-    soup = parse_web(jw_link).findAll('li', class_="linkserver")
-    for i in soup:
-        if "sbplay2" in str(i['data-video']):
-            jw_link = i['data-video'].replace("/e/","/d/")
     try:
-        soup = parse_web(jw_link).findAll('a', text=re.compile("quality")) 
-        x = input("Quality High 1080 - Normal 720 - Low 360\nSelect quality [h/n/l] : ")
-        if x not in ('h','n','l'):
-            x = 'h'
-        hash = re.findall(r"'([1234567890\-abcdef]*)'",soup[0]['onclick'])[0]
-        id = re.findall(r"d\/(.*)",jw_link)[0]
-        soup = parse_web("https://sbplay2.com/dl?op=download_orig&id={id}&mode={quality}&hash={hash}".format(id=id, quality=x, hash=hash))
-        Vlink = soup.find('a', text=re.compile("Direct Download Link"))['href']
+        ses = HTMLSession()
+        page = ses.get(jw_link)
+        json = page.html.render(wait=1, script='jwplayer("myVideo").getPlaylistItem()')
+        for i in range(len(json['sources'])):
+            print("[{num}] {label}".format(num=i,label=json['sources'][i]['label']))
+        x = int(input("Select quality : "))
+        return json['sources'][x]['file']
     except:
-        x = input("Error occured, try again ? [y/n]: ")
-        if x=='n' : return "Cancelled"
+        x = input("Error occured, try again ? [y]: ")
         return vidstreaming(url)
-    return Vlink
 
 
 def bestremo(js):

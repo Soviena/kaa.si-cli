@@ -266,9 +266,8 @@ while True:
             videoLink = scraper.vidstreaming(embedVideoLink)
         else:
             videoLink = scraper.bestremo(episodeData)
-        play_vid(videoLink,episodeData)
         try:
-            pass
+            play_vid(videoLink,episodeData)
         except:
             print("Some error occurred!")
         print("[1] Next episode\n[2] Play again\n[3] Select episode\n[0] Back to menu")
