@@ -10,6 +10,7 @@ def parse_web(url):
     return BeautifulSoup(page, "html.parser")
 
 def vidstreaming(url):
+    print("WARNING!!, FETCHING VIDEO FROM VIDSTREAMING!")
     try:
         from requests_html import HTMLSession
     except:
@@ -27,6 +28,7 @@ def vidstreaming(url):
         for i in range(len(json['sources'])):
             print("[{num}] {label}".format(num=i,label=json['sources'][i]['label']))
         x = int(input("Select quality : "))
+        print(json['sources'][x]['file'])
         return json['sources'][x]['file']
     except:
         x = input("Error occured, try again ? [y]: ")
@@ -42,8 +44,10 @@ def bestremo(js):
         print("Download Link")
         return
     else:
-        print("Vidstreaming")
-        return vidstreaming(js['episode']['link2'])
+        print("Not tested")
+        print(js['episode']['link2'])
+        print("Untested")
+        return
     player = soup.find('script',text=re.compile("sources"))
     player = re.search(r'var sources = \[.*\]',str(player)).group()
     player = player[14:]
