@@ -83,6 +83,8 @@ def selectAnime(animeList):
     return kaa.Base_Url+animeList[x]['slug'] 
 
 def fetchAnilist():
+    global watch_history
+    watch_history = {'anime' : {}, 'last' : {}, 'airing' : {}}
     j = 0
     x = eval(anilist.getListOfAnime(cfg['username'],'CURRENT'))
     for i in x['data']['MediaListCollection']['lists'][0]['entries']:
