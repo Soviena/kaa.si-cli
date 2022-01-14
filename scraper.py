@@ -1,39 +1,48 @@
-import cloudscraper, re, base64, requests
+import cloudscraper, re, base64, requests, random
 from bs4 import BeautifulSoup
+import aes
 
-def parse_web(url):
+def parse_web(url,headers=None):
     try:
         scraper = cloudscraper.create_scraper()
-        page = scraper.get(url).content
+        page = scraper.get(url,headers=headers).content
     except:
-        page = requests.get(url).content
+        page = requests.get(url,headers=headers).content
     return BeautifulSoup(page, "html.parser")
 
 def vidstreaming(url):
-    print("WARNING!!, FETCHING VIDEO FROM VIDSTREAMING!")
-    try:
-        from requests_html import HTMLSession
-    except:
-        print("pls pip install requests_html. Vidstreaming currently cant support termux")
-        return None
     player = parse_web(url).find('script', text=re.compile("player.on"))
     jw_link = re.findall(r"'([http|\/].*)'",re.findall(r"{ w.*",str(player))[0])[0]
     if "http" not in jw_link:
         jw_link = "https:"+jw_link
     print("Getting link...")
-    try:
-        ses = HTMLSession()
-        page = ses.get(jw_link)
-        json = page.html.render(wait=1, script='jwplayer("myVideo").getPlaylistItem()')
-        for i in range(len(json['sources'])):
-            print("[{num}] {label}".format(num=i,label=json['sources'][i]['label']))
+    ajax_url = "https://gogoplay.io/encrypt-ajax.php"
+    page = parse_web(jw_link)
+    try: # Thanks to https://github.com/MeemeeLab/node-anime-viewer/blob/main/src/modules/anime.js
+        value6 = page.find('script', {'data-name':'ts'})['data-value']
+        value5 = page.find('meta',{'name':'crypto'})['content']
+        value7 = page.find('script',{'data-name':'crypto'})['data-value']
+        value1 = aes.decrypt(value7,(value6+value6).encode('utf8'),value6.encode('utf8'))
+        value4 = aes.decrypt(value5,value1,value6.encode('utf8'))
+        value2 = str(random.randint(1000000000000000,9999999999999999))
+        id = re.findall(r'id=([^&]*)',jw_link)[0]
+        encoded_id = aes.encrypt(id,value1,value2.encode('utf8'))
+        param = b'id='+encoded_id+b'&time=00'+value2.encode('utf8')+b'00'+(str(value4)[str(value4).find('&'):-1]).encode('utf8')
+        head = {
+            "x-requested-with":"XMLHttpRequest",
+            "referer": jw_link,
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36 OPR/82.0.4227.50"
+        }
+        json = eval(str(parse_web(ajax_url.encode('utf8')+b'?'+param,headers=head)))
+        for i in range(len(json['source'])):
+            print("[{num}] {label}".format(num=i,label=json['source'][i]['label']))
         x = int(input("Select quality : "))
-        print(json['sources'][x]['file'])
-        return json['sources'][x]['file']
+        return (json['source'][x]['file']).replace('&amp;','&')
     except:
-        x = input("Error occured, try again ? [y]: ")
-        return vidstreaming(url)
-
+        if input("Error occured, try again ? [y/n]: ") in ('Y','y'):
+            return vidstreaming(url)
+        else:
+            raise Exception("Cancelled")
 
 def bestremo(js):
     if js['episode']['link1'] != '':
@@ -42,12 +51,12 @@ def bestremo(js):
         soup = parse_web(js['episode']['link4'])
     elif js['episode']['link3'] != '':
         print("Download Link")
-        return
+        raise Exception("Not implemented")
     else:
         print("Not tested")
         print(js['episode']['link2'])
         print("Untested")
-        return
+        raise Exception("Not implemented")
     player = soup.find('script',text=re.compile("sources"))
     player = re.search(r'var sources = \[.*\]',str(player)).group()
     player = player[14:]
