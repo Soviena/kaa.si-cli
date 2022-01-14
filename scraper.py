@@ -36,7 +36,16 @@ def vidstreaming(url):
 
 
 def bestremo(js):
-    soup = parse_web(js['episode']['link1'])
+    if js['episode']['link1'] != '':
+        soup = parse_web(js['episode']['link1'])
+    elif js['episode']['link4'] != '':
+        soup = parse_web(js['episode']['link4'])
+    elif js['episode']['link3'] != '':
+        print("Download Link")
+        return
+    else:
+        print("Vidstreaming")
+        return vidstreaming(js['episode']['link2'])
     player = soup.find('script',text=re.compile("sources"))
     player = re.search(r'var sources = \[.*\]',str(player)).group()
     player = player[14:]
