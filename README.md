@@ -13,6 +13,7 @@ MPV or VLC installed to path
 - requests
 - bs4
 - pypresence
+- crypto
 
 feedback is apreciated
 
