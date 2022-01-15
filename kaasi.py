@@ -57,6 +57,7 @@ def updateWatchHistory(epsData,anilist=None):
         watch_history['last']['mediaId'] = anilist['media']['id']
         if epsData['anime']['status'] == "Currently Airing" and anilist['media']['status'] in ('RELEASING','NOT_YET_RELEASED'):
             watch_history['airing'][epsData['anime']['name']] = watch_history['anime'][epsData['anime']['name']]
+            watch_history['airing'][epsData['anime']['name']]['airingAt'] = anilist['media']['nextAiringEpisode']['airingAt']
     elif epsData['anime']['status'] == "Currently Airing":
         watch_history['airing'][epsData['anime']['name']] = watch_history['anime'][epsData['anime']['name']]
     with open('history.txt','w',encoding='utf-8') as histo:
@@ -86,7 +87,7 @@ def fetchAnilist():
     global watch_history
     watch_history = {'anime' : {}, 'last' : {}, 'airing' : {}}
     j = 0
-    x = eval(anilist.getListOfAnime(cfg['username'],'CURRENT'))
+    x = eval(anilist.getListOfAnime(cfg['username'],'CURRENT').replace(b'null',b'None'))
     for i in x['data']['MediaListCollection']['lists'][0]['entries']:
         print("\033[94mFetching",i['media']['title']['romaji'],"\033[0m")
         anime = kaa.search_anime(i['media']['title']['romaji'])
@@ -111,7 +112,22 @@ def fetchAnilist():
     if j>0 :
         print("\033[91m",j,"anime's failed to sync!!\033[0m")
 
+def searchAnilist(query):
+    q = anilist.searchAnime(query,True)
+    if q.status_code == 404:
+        raise Exception("NOT FOUND")
+    else:
+        q = q.content.replace(b'null',b'None')
+        q = eval(q)['data']['Page']
+        for i in range(len(q['media'])):
+            print(f"[{i}] {q['media'][i]['title']['romaji']}")
+        x = int(input("select anime : "))
+        q['media'] = q['media'][x]
+        return q
+        
+
 def play_vid(link,epsData):
+    global watch_history
     if dcrpc:
         try:
             RPC.update(state=epsData['anime']['name'] + " ("+ re.findall(r' (\d*)',epsData['episode']['name'])[0] +" of "+str(len(epsData['episodes'])) + ")", details="Watching anime", start=time.time())
@@ -126,9 +142,29 @@ def play_vid(link,epsData):
             os.system('am start --user 0 -a android.intent.action.VIEW -d "{link}" -n org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity'.format(link=link))
     else:
         os.system('{pl} "{link}"'.format(pl=cfg['player'],link=link))
-    ani = kaa.searchAnimefromAnilist(epsData)
+
+    if epsData['anime']['name'] in watch_history['anime']:
+        ani_id = watch_history['anime'][epsData['anime']['name']]['mediaId']
+        ani = anilist.searchAnimeId(ani_id).content.replace(b'null',b'None')
+        ani = eval(ani)['data']
+        ani['media'] = ani['Media']
+    else:
+        try:
+            ani = kaa.searchAnimefromAnilist(epsData)
+        except:
+            ani = None
+            print("CANT FOUND ANIME IN ANILIST!")
+            n = input("Manually search anime in anilist ? [y/n] : ") in ('Y','y')
+            while n:
+                q = input("Anime name : ")
+                try:
+                    ani = searchAnilist(q)
+                    n = False
+                except:
+                    n = input("Not found, try again ? [y/n] : ") in ('Y','y')
+    
     updateWatchHistory(epsData,ani)
-    if cfg['anilist']:
+    if cfg['anilist'] and ani != None:
         if cfg['auto']:
             updateAnilist(epsData,ani)
         else:
@@ -166,6 +202,7 @@ while True:
         animes_v = list(watch_history['anime'].values())
         animes_k = list(watch_history['anime'].keys())
         airing_k = list(watch_history['airing'].keys())
+        airing_v = list(watch_history['airing'].values())
         for i in range(len(animes_k)):
             if i%2 == 0:
                 print('\033[96m[{i}] {anime} {episode}'.format(i=i, anime=animes_k[i], episode=animes_v[i]['label']), end=' ')
@@ -174,21 +211,9 @@ while True:
             if animes_v[i]['next-link'] == '' and animes_v[i]['status'] in ("Finished Airing","Completed"):
                 print('\033[94mFinished',end='')
             elif animes_k[i] in airing_k:
-                next = kaa.parse_appData(animes_v[i]['episodeLink'])  
-                if next['anime']['status'] not in ("Finished Airing","Completed"):
-                    print('\033[93mAiring ',end='')
-                    if next['episode']['next'] != None:
-                        print('\033[95mUPDATED!',end='')
-                    else:
-                        print("in ",end='')
-                        hour = (eval(anilist.searchAnimeId(animes_v[i]['mediaId']).content)['data']['Media']['nextAiringEpisode']['timeUntilAiring']//60)//60
-                        d = hour//24
-                        h = hour%24
-                        if d != 0:
-                            print(d,'day and',end=' ')
-                        print(h,'hour',end='')
+                print('\033[93mAiring ',end='')
             print('\033[0m')
-        x = input('\n[D] to delete finished anime\n[S] to sync with anilist\nSelect anime to resume watching : ')
+        x = input('\n[D] to delete finished anime\n[S] to sync with anilist\n[A] to check next airing episode\nSelect anime to resume watching : ')
         if x in ('D','d'):
             for i in range(len(animes_k)):
                 if animes_v[i]['next-link'] == '' and animes_v[i]['status'] in ("Finished Airing","Completed"):
@@ -205,6 +230,49 @@ while True:
             else:
                 print("NOT CONNECTED TO ANILIST")    
             x = 0
+        elif x in ('A','a'):
+            for i in range(len(airing_k)):
+                if i%2 == 0:
+                    print('\033[96m[{i}] {anime} {episode}'.format(i=i, anime=airing_k[i], episode=airing_v[i]['label']), end=' ')
+                else:
+                    print('\033[92m[{i}] {anime} {episode}'.format(i=i, anime=airing_k[i], episode=airing_v[i]['label']), end=' ')
+                next = kaa.parse_appData(airing_v[i]['episodeLink'])  
+                if next['anime']['status'] not in ("Finished Airing","Completed"):
+                    print('\033[93mAiring ',end='')
+                    if next['episode']['next'] != None:
+                        print('\033[95mUPDATED!',end='')
+                    else:
+                        unix = watch_history['airing'][airing_k[i]]['airingAt']-int(time.time())
+                        if unix > 0:
+                            print("in ",end='')
+                            hour = (unix//60)//60
+                            d = hour//24
+                            h = hour%24
+                            if d != 0:
+                                print(d,'day and',end=' ')
+                            print(h,'hour',end='')
+                        else:
+                            print('\033[95mAIRED, not yet Updated',end='')
+                print('\033[0m')
+            x = input('\nSelect anime to resume watching : ')
+            try:
+                x = int(x)
+                animeLink = re.findall(r"(.*)\/episode",airing_v[x]['episodeLink'])[0]
+                if airing_v[x]['next-link'] == '':
+                    episodeData = kaa.parse_appData(airing_v[x]['episodeLink'])  
+                    if episodeData['episode']['next'] == None:
+                        print('not yet updated' )
+                        x = 0
+                    else:
+                        embedVideoLink = kaa.check_link(episodeData)
+                        x = -1
+                else:
+                    episodeData = kaa.parse_appData(airing_v[x]['next-link'])    
+                    embedVideoLink = kaa.check_link(episodeData) 
+                    x = -1
+            except :
+                print("Error")
+                x = 0            
         else:
             try:
                 x = int(x)

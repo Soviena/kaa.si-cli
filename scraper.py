@@ -77,10 +77,7 @@ def sel_source(json_list):
     if j == 0 :
         raise Exception("No available source")
     x = int(input("Select source : "))
-    if json_list[x]['name'] in ("A-KICKASSANIME","THETA-ORIGINAL","PINK-BIRD","SAPPHIRE-DUCK"):
-        return check_method(str(json_list[x]['src']).replace('\\',''),json_list)
-    else:
-        return s_pref_iframe(str(json_list[x]['src']).replace('\\',''),json_list)
+    return s_pref_iframe(str(json_list[x]['src']).replace('\\',''),json_list)
 
 def decode_base64(text,lossless=False):
     base64_bytes = text.encode('ascii')
@@ -92,12 +89,12 @@ def decode_base64(text,lossless=False):
 def s_pref_iframe(link,json_list):
     soup = parse_web(link)
     player = soup.find('iframe')
-    if 'embed.php' in link:
+    if player == None:
+        return check_method(link,json_list)
+    elif 'embed.php' in link:
         return check_method(link[:link.find('embed.php')]+player['src'],json_list)
     elif 'player.php' in link:
         return check_method(link[:link.find('player.php')]+player['src'],json_list)
-    else:
-        raise Exception("IFRAME NOT FOUND")
 
 def check_method(link,json_list):
     print('getting link...')

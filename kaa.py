@@ -24,6 +24,8 @@ def searchAnimefromAnilist(epsData):
             q = anilist.searchAnime(epsData['anime']['name'])
     else:
         q = anilist.searchAnime(epsData['anime']['name'])
+    if q.status_code == 404:
+        raise Exception('NOT FOUND!')
     q = q.content.replace(b'null',b'None')
     q = eval(q)['data']
     q['media'] = q['Media']

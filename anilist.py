@@ -44,10 +44,51 @@ def saveMediaListEntry(id,token,status,episode):
     header = {'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Accept': 'application/json'}
     return  requests.post('https://graphql.anilist.co',headers=header,json={'query' : query, 'variables' : var})    
 
-def searchAnime(title):
+def searchAnime(title,page=False):
+    if page:
+        query = """
+            query ($title: String) { 
+                Page(perPage:10){
+                    media (search: $title, type: ANIME){
+                        id
+                        title {
+                            romaji
+                            english
+                        }
+                        description
+                        status
+                        nextAiringEpisode{
+                            airingAt
+                        }            
+                    }                    
+                }
+
+            }            
+        """
+    else:
+        query = """
+            query ($title: String) { 
+            Media (search: $title, type: ANIME){
+                id
+                title {
+                    romaji
+                    english
+                }
+                description
+                status
+                nextAiringEpisode{
+                    airingAt
+                }            
+            }
+            }
+            """
+    variable = {'title' : title}
+    return requests.post(url, json={'query': query, 'variables': variable})
+
+def searchAnimeId(id):
     query = """
-        query ($title: String) { 
-        Media (search: $title, type: ANIME){
+        query ($id: Int) { 
+        Media (id: $id, type: ANIME){
             id
             title {
                 romaji
@@ -56,26 +97,7 @@ def searchAnime(title):
             description
             status
             nextAiringEpisode{
-                timeUntilAiring
-            }            
-        }
-        }
-        """
-    variable = {'title' : title}
-    return requests.post(url, json={'query': query, 'variables': variable})
-
-def searchAnimeId(id):
-    query = """
-        query ($id: Int) { 
-        Media (id: $id, type: ANIME){
-            title {
-                romaji
-                english
-            }
-            description
-            status
-            nextAiringEpisode{
-                timeUntilAiring
+                airingAt
             }
         }
         }
@@ -93,10 +115,14 @@ def getListOfAnime(user,status):
                             title {
                                 romaji
                                 english
+                                native
                                 userPreferred
                             }
                             status
                             id
+                            nextAiringEpisode{
+                                airingAt
+                            }                                     
                         }
                         progress
                     }
