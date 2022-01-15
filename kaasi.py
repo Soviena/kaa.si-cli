@@ -133,15 +133,41 @@ def play_vid(link,epsData):
             RPC.update(state=epsData['anime']['name'] + " ("+ re.findall(r' (\d*)',epsData['episode']['name'])[0] +" of "+str(len(epsData['episodes'])) + ")", details="Watching anime", start=time.time())
         except:
             RPC.update(state=epsData['anime']['name'], details="Watching anime", start=time.time())
+    referer = ''
+    sub = ''
+    if type(link) is dict:
+        if cfg['termux']:
+            print("NOT SUPPORTED FOR TERMUX")
+            raise Exception("Unsupported")
+        sub = ' --sub-file='+re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0]+link['sub']
+        link = link['vlink']
+        referer = ' --http-header-fields="Referer: '+re.findall(r'(https:\/\/[^/]*)',link)[0]+'" '
+    elif re.search(r'maverickki|betaplayer',link):
+        if cfg['termux']:
+            if cfg['player'] == "mpv":
+                referer = ' -e "http-header-fields" "{url}"'.format(url=re.findall(r'(https:\/\/[^/]*)',link)[0])
+            else:
+                print(link,"IS NOT TESTED IN VLC")
+                raise Exception("Unsupported")
+        else:
+            referer = ' --http-header-fields="Referer: '+re.findall(r'(https:\/\/[^/]*)',link)[0]+'" '
+    print(link)
     print('Trying to play video...')
     link = link.replace('\\','')
     if cfg['termux']:
         if cfg['player'] == "mpv":
-            os.system('am start --user 0 -a android.intent.action.VIEW -d "{link}" -n is.xyz.mpv/.MPVActivity'.format(link=link))
+            syx = 'am start --user 0 -a android.intent.action.VIEW -d "{link}" -n is.xyz.mpv/.MPVActivity'.format(link=link)
+            if referer != '':
+                syx += referer
         else:
-            os.system('am start --user 0 -a android.intent.action.VIEW -d "{link}" -n org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity'.format(link=link))
+            syx = 'am start --user 0 -a android.intent.action.VIEW -d "{link}" -n org.videolan.vlc/org.videolan.vlc.gui.video.VideoPlayerActivity'.format(link=link)
     else:
-        os.system('{pl} "{link}"'.format(pl=cfg['player'],link=link))
+        syx = '{pl} "{link}"'.format(pl=cfg['player'],link=link)
+        if referer != '':
+            syx += referer
+        if sub != '':
+            syx += sub
+    os.system(syx)
 
     if epsData['anime']['name'] in watch_history['anime']:
         ani_id = watch_history['anime'][epsData['anime']['name']]['mediaId']

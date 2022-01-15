@@ -2,6 +2,7 @@
 [![pypresence](https://img.shields.io/badge/using-pypresence-00bb88.svg?style=for-the-badge&logo=discord&logoWidth=20)](https://github.com/qwertyquerty/pypresence)
 
 Stream anime using MPV player from kaa.si with python
+Termux compatible!
 
 Demo video : https://youtu.be/WgQgQmZy5nE
 
@@ -32,6 +33,5 @@ inspired by https://github.com/pystardust/ani-cli
 5. double click `kaasi.py` or open it with cmd / powershell `python kaasi.py`
 6. Profit!
 
-For android user, you can use termux to run this code! [Termux branch](https://github.com/Soviena/kaa.si-cli/tree/Termux)
 
 

@@ -2,12 +2,14 @@ import cloudscraper, re, base64, requests, random
 from bs4 import BeautifulSoup
 import aes
 
-def parse_web(url,headers=None):
+def parse_web(url,headers=None,raw=False):
     try:
         scraper = cloudscraper.create_scraper()
         page = scraper.get(url,headers=headers).content
     except:
         page = requests.get(url,headers=headers).content
+    if raw:
+        return page
     return BeautifulSoup(page, "html.parser")
 
 def vidstreaming(url):
@@ -71,9 +73,8 @@ def bestremo(js):
 def sel_source(json_list):
     j = 0
     for i in range(len(json_list)):
-        if not ((json_list[i]['name'] == "MAVERICKKI") or (json_list[i]['name'] == "BETAPLAYER")):
-            print("[{num}] {source}".format(num=i,source=json_list[i]['name']))
-            j+=1
+        print("[{num}] {source}".format(num=i,source=json_list[i]['name']))
+        j+=1
     if j == 0 :
         raise Exception("No available source")
     x = int(input("Select source : "))
@@ -98,6 +99,17 @@ def s_pref_iframe(link,json_list):
 
 def check_method(link,json_list):
     print('getting link...')
+    if 'maverickki' in link:
+        s = parse_web(link.replace('embed','api/source'),raw=True)
+        vjs = eval(s)
+        if len(vjs['subtitles']) != 0:
+            for i in range(len(vjs['subtitles'])):
+                print('[{idx}] {name}'.format(idx=i,name=vjs['subtitles'][i]['name']))
+            x = int(input("Select subtitle : "))
+            return {'vlink' : 'https://maverickki.com'+vjs['hls'], 'sub' : vjs['subtitles'][x]['src']}
+        else:
+            return 'https://maverickki.com'+vjs['hls']
+
     soup = parse_web(link)
     player = soup.findAll('script')
     for i in player:
