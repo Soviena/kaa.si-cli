@@ -151,7 +151,6 @@ def play_vid(link,epsData):
                 raise Exception("Unsupported")
         else:
             referer = ' --http-header-fields="Referer: '+re.findall(r'(https:\/\/[^/]*)',link)[0]+'" '
-    print(link)
     print('Trying to play video...')
     link = link.replace('\\','')
     if cfg['termux']:
