@@ -142,9 +142,11 @@ def play_vid(link,epsData):
         sub = ' --sub-file='+re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0]+link['sub']
         link = link['vlink']
         referer = ' --http-header-fields="Referer: '+re.findall(r'(https:\/\/[^/]*)',link)[0]+'" '
-    elif re.search(r'maverickki|betaplayer',link):
+    elif re.search(r'maverickki|betaplayer',str(link)):
         if cfg['termux']:
             if cfg['player'] == "mpv":
+                print("Can't pass header in mpv android!!")
+                raise Exception("CANT PASS HEADER!")
                 referer = ' -e "http-header-fields" "{url}"'.format(url=re.findall(r'(https:\/\/[^/]*)',link)[0])
             else:
                 print(link,"IS NOT TESTED IN VLC")
@@ -167,7 +169,6 @@ def play_vid(link,epsData):
         if sub != '':
             syx += sub
     os.system(syx)
-
     if epsData['anime']['name'] in watch_history['anime']:
         ani_id = watch_history['anime'][epsData['anime']['name']]['mediaId']
         ani = anilist.searchAnimeId(ani_id).content.replace(b'null',b'None')
@@ -311,6 +312,7 @@ while True:
                         print('not yet updated' )
                         x = 0
                     else:
+                        episodeData = kaa.parse_appData(animes_v[x]['next-link']) 
                         embedVideoLink = kaa.check_link(episodeData)
                         x = -1
                 else:
