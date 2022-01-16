@@ -290,7 +290,7 @@ while True:
                         print('not yet updated' )
                         x = 0
                     else:
-                        episodeData = kaa.parse_appData(airing_v[x]['next-link'])
+                        episodeData = kaa.parse_appData(kaa.Base_Url+episodeData['episode']['next']['slug'])
                         embedVideoLink = kaa.check_link(episodeData)
                         x = -1
                 else:
@@ -317,7 +317,7 @@ while True:
                         embedVideoLink = kaa.check_link(episodeData)
                         x = -1
                 else:
-                    episodeData = kaa.parse_appData(kaa.Base_Url+episodeData['episode']['next']['slug'])
+                    episodeData = kaa.parse_appData(animes_v[x]['next-link'])
                     embedVideoLink = kaa.check_link(episodeData) 
                     x = -1
             except :
