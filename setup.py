@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="kaa.si-cli",
+    name="kaasi-cli",
     version="1.0.0",
     author="Soviena",
     author_email="rovino.rs@gmail.com",
@@ -22,8 +22,7 @@ setup(
         "pypresence",
         "pycryptodome",
     ],
-    entry_points="""
-        [console_scripts]
-        kaasi=kaasi.py
-    """,
+    entry_points={
+        'console_scripts': ['kaasi=kaasi_cli.kaasi:kaasi']
+    }
 )

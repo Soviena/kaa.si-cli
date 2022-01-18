@@ -2,9 +2,7 @@ from pypresence import Presence
 import time, re, os
 
 # local
-import anilist
-import kaa
-import scraper
+from kaasi_cli import kaa, scraper, anilist
 
 logo = """
 
@@ -196,6 +194,10 @@ def play_vid(link,epsData):
         else:
             if input("Update anilist progress ? [y/n] : ") in ('Y','y'):
                 updateAnilist(epsData,ani)
+
+
+def kaasi():
+    pass
 
 
 #MAIN PROGRAM

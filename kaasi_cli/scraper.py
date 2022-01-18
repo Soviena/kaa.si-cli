@@ -1,6 +1,7 @@
+import imp
 import cloudscraper, re, base64, requests, random
 from bs4 import BeautifulSoup
-import aes
+from kaasi_cli import aes
 
 def parse_web(url,headers=None,raw=False):
     try:
