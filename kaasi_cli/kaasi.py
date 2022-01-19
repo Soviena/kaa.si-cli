@@ -150,7 +150,10 @@ def play_vid(link,epsData):
                 print(link,"IS NOT TESTED IN VLC")
                 raise Exception("Unsupported")
         else:
-            referer = ' --http-header-fields="Referer: '+re.findall(r'(https:\/\/[^/]*)',link)[0]+'" '
+            if cfg['player'] == "mpv":
+                referer = ' --http-header-fields="Referer: '+re.findall(r'(https:\/\/[^/]*)',link)[0]+'" '
+            else:
+                referer = ' --http-referrer="{0}"'.format(re.findall(r'(https:\/\/[^/]*)',link)[0])
     print('Trying to play video...')
     link = link.replace('\\','')
     if cfg['termux']:
