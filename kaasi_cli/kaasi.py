@@ -10,7 +10,7 @@ logo = """
 \033[95m██  ██ \033[93m ██   ██ ██   ██\033[95m       \033[94m██      \033[92m██     \033[91m ██ 
 \033[95m█████  \033[93m ███████ ███████\033[95m █████ \033[94m██      \033[92m██     \033[91m ██ 
 \033[95m██  ██ \033[93m ██   ██ ██   ██\033[95m       \033[94m██      \033[92m██     \033[91m ██ 
-\033[95m██   ██\033[93m ██   ██ ██   ██\033[95m       \033[94m ██████ \033[92m███████\033[91m ██ v1.0.0
+\033[95m██   ██\033[93m ██   ██ ██   ██\033[95m       \033[94m ██████ \033[92m███████\033[91m ██ v1.0.2
 \033[0m                                          
 """
 
@@ -128,7 +128,7 @@ def play_vid(link,epsData):
     global watch_history
     if dcrpc:
         try:
-            RPC.update(state=epsData['anime']['name'] + " ("+ re.findall(r' (\d*)',epsData['episode']['name'])[0] +" of "+str(len(epsData['episodes'])) + ")", details="Watching anime", start=time.time())
+            RPC.update(state=epsData['anime']['name'] + " ("+ re.findall(r' (\d*)',epsData['episode']['name'])[0] +" of "+str(len(epsData['episodes'])) + ")", details="Watching anime", start=time.time(),large_image="https://www2.kickassanime.ro/uploads/"+epsData['anime']['image'],large_text=epsData['anime']['name'])
         except:
             RPC.update(state=epsData['anime']['name'], details="Watching anime", start=time.time())
     referer = ''
