@@ -29,9 +29,11 @@ inspired by https://github.com/pystardust/ani-cli
 - [Add program to path](https://www.architectryan.com/2018/03/17/add-to-the-path-on-windows-10/)
 3. Download latest package from [Release](https://github.com/Soviena/kaa.si-cli/releases)
 5. Extract and open folder as admin in cmd / powershell
-6. `python setup.py install`
+6. `python setup.py install` or `sudo python setup.py install` for linux
 7. and run `kaasi` in cmd / powershell to open the app
 8. Profit!
 
+### note
+*the program will create kaasi.txt and history.txt in your terminal directory*
 
 
