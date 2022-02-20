@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="kaasi-cli",
-    version="1.0.2",
+    version="1.0.3",
     author="Soviena",
     author_email="rovino.rs@gmail.com",
     description="Stream anime from kaa.si and sync with anilist",

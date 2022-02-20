@@ -10,7 +10,7 @@ logo = """
 \033[95m██  ██ \033[93m ██   ██ ██   ██\033[95m       \033[94m██      \033[92m██     \033[91m ██ 
 \033[95m█████  \033[93m ███████ ███████\033[95m █████ \033[94m██      \033[92m██     \033[91m ██ 
 \033[95m██  ██ \033[93m ██   ██ ██   ██\033[95m       \033[94m██      \033[92m██     \033[91m ██ 
-\033[95m██   ██\033[93m ██   ██ ██   ██\033[95m       \033[94m ██████ \033[92m███████\033[91m ██ v1.0.2
+\033[95m██   ██\033[93m ██   ██ ██   ██\033[95m       \033[94m ██████ \033[92m███████\033[91m ██ v1.0.3
 \033[0m                                          
 """
 
@@ -152,6 +152,7 @@ def play_vid(link,epsData):
                 if input("only do this once for each server you choose. Open mpv ? [y/n] : ") in ('Y', 'y'):
                     os.system('am start --user 0 -a android.intent.action.VIEW -n is.xyz.mpv/.MainActivity')
                 referer = ''
+                input("Press enter")
                 # raise Exception("CANT PASS HEADER!")
             else:
                 print(link,"IS NOT TESTED IN VLC")
