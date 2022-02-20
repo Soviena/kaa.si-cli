@@ -140,8 +140,10 @@ def play_vid(link,epsData):
     sub = ''
     if type(link) is dict:            
         if cfg['termux']:
-            sub = ' -e "subs" "{}"'.format(re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0]+link['sub'])
+            sub = re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0]+link['sub']
             termux_mpv_referrer(re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0])
+            print("Put this link in external subtitle while playing the videdo \n{}\n Setting (top right corner) -> open external subtitle -> url")
+            input("Press enter")
         else:
             sub = ' --sub-file='+re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0]+link['sub']
             referer = ' --referrer="'+re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0]+'" '
