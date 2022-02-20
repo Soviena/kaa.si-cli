@@ -10,7 +10,7 @@ logo = """
 \033[95m██  ██ \033[93m ██   ██ ██   ██\033[95m       \033[94m██      \033[92m██     \033[91m ██ 
 \033[95m█████  \033[93m ███████ ███████\033[95m █████ \033[94m██      \033[92m██     \033[91m ██ 
 \033[95m██  ██ \033[93m ██   ██ ██   ██\033[95m       \033[94m██      \033[92m██     \033[91m ██ 
-\033[95m██   ██\033[93m ██   ██ ██   ██\033[95m       \033[94m ██████ \033[92m███████\033[91m ██ v1.0.3
+\033[95m██   ██\033[93m ██   ██ ██   ██\033[95m       \033[94m ██████ \033[92m███████\033[91m ██ v1.0.4
 \033[0m                                          
 """
 
@@ -142,7 +142,7 @@ def play_vid(link,epsData):
         if cfg['termux']:
             sub = re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0]+link['sub']
             termux_mpv_referrer(re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0])
-            print("Put this link in external subtitle while playing the videdo \n{}\n Setting (top right corner) -> open external subtitle -> url").format(sub)
+            print("Put this link in external subtitle while playing the video \n{}\n Setting (top right corner) -> open external subtitle -> url".format(sub))
             input("Press enter")
         else:
             sub = ' --sub-file='+re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0]+link['sub']
