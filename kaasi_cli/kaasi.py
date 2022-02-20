@@ -123,6 +123,11 @@ def searchAnilist(query):
         q['media'] = q['media'][x]
         return q
         
+def termux_mpv_referrer(ref):
+    print("Can't pass header in mpv android!!\npls add it manually\nGoto settings -> Advanced -> Edit mpv.conf\nadd referrer={}".format(ref))
+    if input("only do this once for each server you choose. Open mpv ? [y/n] : ") in ('Y', 'y'):
+        os.system('am start --user 0 -a android.intent.action.VIEW -n is.xyz.mpv/.MainActivity')
+    input("Press enter")    
 
 def play_vid(link,epsData):
     global watch_history
@@ -133,13 +138,14 @@ def play_vid(link,epsData):
             RPC.update(state=epsData['anime']['name'], details="Watching anime", start=time.time())
     referer = ''
     sub = ''
-    if type(link) is dict:
+    if type(link) is dict:            
         if cfg['termux']:
-            print("NOT SUPPORTED FOR TERMUX")
-            raise Exception("Unsupported")
-        sub = ' --sub-file='+re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0]+link['sub']
+            sub = ' -e "subs" "{}"'.format(re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0]+link['sub'])
+            termux_mpv_referrer(re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0])
+        else:
+            sub = ' --sub-file='+re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0]+link['sub']
+            referer = ' --referrer="'+re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0]+'" '
         link = link['vlink']
-        referer = ' --referrer="'+re.findall(r'(https:\/\/[^/]*)',link)[0]+'" '
     elif re.search(r'maverickki|betaplayer|vidstreamingcdn',str(link)):
         if cfg['termux']:
             if cfg['player'] == "mpv":
@@ -148,11 +154,8 @@ def play_vid(link,epsData):
                     referer = '"https://gogoanime.fi"'
                 else:
                     referer = '"{url}"'.format(url=re.findall(r'(https:\/\/[^/]*)',link)[0])
-                print("Can't pass header in mpv android!!\npls add it manually\nGoto settings -> Advanced -> Edit mpv.conf\nadd referrer={}".format(referer))
-                if input("only do this once for each server you choose. Open mpv ? [y/n] : ") in ('Y', 'y'):
-                    os.system('am start --user 0 -a android.intent.action.VIEW -n is.xyz.mpv/.MainActivity')
+                termux_mpv_referrer(referer)
                 referer = ''
-                input("Press enter")
                 # raise Exception("CANT PASS HEADER!")
             else:
                 print(link,"IS NOT TESTED IN VLC")
