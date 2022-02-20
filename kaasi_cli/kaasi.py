@@ -143,11 +143,15 @@ def play_vid(link,epsData):
     elif re.search(r'maverickki|betaplayer|vidstreamingcdn',str(link)):
         if cfg['termux']:
             if cfg['player'] == "mpv":
-                print("Can't pass header in mpv android!!")
+                link = link.replace('\\','')
                 if re.search(r'vidstreamingcdn',str(link)):
-                    referer = ' -e "referrer" "https://gogoanime.fi"'
+                    referer = '"https://gogoanime.fi"'
                 else:
-                    referer = ' -e "referrer" "{url}"'.format(url=re.findall(r'(https:\/\/[^/]*)',link)[0])
+                    referer = '"{url}"'.format(url=re.findall(r'(https:\/\/[^/]*)',link)[0])
+                print("Can't pass header in mpv android!!\npls add it manually\nGoto settings -> Advanced -> Edit mpv.conf\nadd referrer={}".format(referer))
+                if input("only do this once for each server you choose. Open mpv ? [y/n] : ") in ('Y', 'y'):
+                    os.system('am start --user 0 -a android.intent.action.VIEW -n is.xyz.mpv/.MainActivity')
+                referer = ''
                 # raise Exception("CANT PASS HEADER!")
             else:
                 print(link,"IS NOT TESTED IN VLC")
