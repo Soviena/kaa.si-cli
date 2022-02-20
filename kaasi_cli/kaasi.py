@@ -139,21 +139,31 @@ def play_vid(link,epsData):
             raise Exception("Unsupported")
         sub = ' --sub-file='+re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0]+link['sub']
         link = link['vlink']
-        referer = ' --http-header-fields="Referer: '+re.findall(r'(https:\/\/[^/]*)',link)[0]+'" '
-    elif re.search(r'maverickki|betaplayer',str(link)):
+        referer = ' --referrer="'+re.findall(r'(https:\/\/[^/]*)',link)[0]+'" '
+    elif re.search(r'maverickki|betaplayer|vidstreamingcdn',str(link)):
         if cfg['termux']:
             if cfg['player'] == "mpv":
                 print("Can't pass header in mpv android!!")
-                raise Exception("CANT PASS HEADER!")
-                referer = ' -e "http-header-fields" "{url}"'.format(url=re.findall(r'(https:\/\/[^/]*)',link)[0])
+                if re.search(r'vidstreamingcdn',str(link)):
+                    referer = ' -e "referrer" "https://gogoanime.fi"'
+                else:
+                    referer = ' -e "referrer" "{url}"'.format(url=re.findall(r'(https:\/\/[^/]*)',link)[0])
+                # raise Exception("CANT PASS HEADER!")
             else:
                 print(link,"IS NOT TESTED IN VLC")
                 raise Exception("Unsupported")
         else:
+            link = link.replace('\\','')
             if cfg['player'] == "mpv":
-                referer = ' --http-header-fields="Referer: '+re.findall(r'(https:\/\/[^/]*)',link)[0]+'" '
+                if re.search(r'vidstreamingcdn',str(link)):
+                    referer = ' --referrer="https://gogoanime.fi"'
+                else:
+                    referer = ' --referrer="'+re.findall(r'(https:\/\/[^/]*)',link)[0]+'" '
             else:
-                referer = ' --http-referrer="{0}"'.format(re.findall(r'(https:\/\/[^/]*)',link)[0])
+                if re.search(r'vidstreamingcdn',str(link)):
+                    referer = ' --http-referrer="https://gogoanime.fi"'
+                else:                
+                    referer = ' --http-referrer="{0}"'.format(re.findall(r'(https:\/\/[^/]*)',link)[0])
     print('Trying to play video...')
     link = link.replace('\\','')
     if cfg['termux']:
