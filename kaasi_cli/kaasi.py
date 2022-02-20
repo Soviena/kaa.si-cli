@@ -127,7 +127,7 @@ def termux_mpv_referrer(ref):
     print("Can't pass header in mpv android!!\npls add it manually\nGoto settings -> Advanced -> Edit mpv.conf\nadd referrer={}".format(ref))
     if input("only do this once for each server you choose. Open mpv ? [y/n] : ") in ('Y', 'y'):
         os.system('am start --user 0 -a android.intent.action.VIEW -n is.xyz.mpv/.MainActivity')
-    input("Press enter")    
+        input("Press enter")    
 
 def play_vid(link,epsData):
     global watch_history
@@ -142,7 +142,7 @@ def play_vid(link,epsData):
         if cfg['termux']:
             sub = re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0]+link['sub']
             termux_mpv_referrer(re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0])
-            print("Put this link in external subtitle while playing the videdo \n{}\n Setting (top right corner) -> open external subtitle -> url")
+            print("Put this link in external subtitle while playing the videdo \n{}\n Setting (top right corner) -> open external subtitle -> url").format(sub)
             input("Press enter")
         else:
             sub = ' --sub-file='+re.findall(r'(https:\/\/[^/]*)',link['vlink'])[0]+link['sub']
