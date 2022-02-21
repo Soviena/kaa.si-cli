@@ -33,6 +33,9 @@ inspired by https://github.com/pystardust/ani-cli
 7. and run `kaasi` in cmd / powershell to open the app
 8. Profit!
 
+## UNINSTALL
+1. `pip uninstall kaasi-cli` or `sudo pip uninstall kaasi-cli`
+
 ### note
 *the program will create kaasi.txt and history.txt in your terminal directory*
 
