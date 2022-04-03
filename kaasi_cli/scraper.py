@@ -17,7 +17,7 @@ def vidstreaming(url):
     jw_link = re.findall(r"'([http|\/].*)'",re.findall(r"{ w.*",str(player))[0])[0]
     if "http" not in jw_link:
         jw_link = "https:"+jw_link
-    print("Getting link...")
+    print("Getting link from vidstreaming")
     ajax_url = "https://gogoplay.io/encrypt-ajax.php"
     page = parse_web(jw_link)
     try: # Thanks to https://github.com/MeemeeLab/node-anime-viewer/blob/main/src/modules/anime.js
@@ -71,6 +71,7 @@ def bestremo(js):
                 return vidstreaming(js['ext_servers'][i]['link'])
 
 def sel_source(json_list):
+    print("sel source")
     j = 0
     for i in range(len(json_list)):
         print("[{num}] {source}".format(num=i,source=json_list[i]['name']))
@@ -88,6 +89,8 @@ def decode_base64(text,lossless=False):
     return message_bytes.decode('ascii')
 
 def s_pref_iframe(link,json_list):
+    print("here")
+    print(link)
     soup = parse_web(link)
     player = soup.find('iframe')
     if player == None:
@@ -98,7 +101,7 @@ def s_pref_iframe(link,json_list):
         return check_method(link[:link.find('player.php')]+player['src'],json_list)
 
 def check_method(link,json_list):
-    print('getting link...')
+    print('getting link... from bestremo')
     if 'maverickki' in link:
         s = parse_web(link.replace('embed','api/source'),raw=True)
         vjs = eval(s)
