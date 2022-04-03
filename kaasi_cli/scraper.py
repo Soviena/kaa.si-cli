@@ -25,7 +25,7 @@ def vidstreaming(url):
         ajaxData = '63976882873559819639988080820907'.encode('utf8')
         episodeVal = page.find('script', {'data-name':'episode'})['data-value']
         decData = aes.decrypt(episodeVal, ajaxData, iv).decode()
-        videoId = re.search(r'(.*)&title', decData).group(1)
+        videoId = re.search(r'(.*?)\&', decData).group(1)
         # decData = re.search(r'(&.*)', string).group(1)
         encryptVid = aes.encrypt(videoId, ajaxData, iv)
         param = 'id='+encryptVid.decode()+re.search(r'(&.*)', decData).group(1)+'&alias='+videoId
