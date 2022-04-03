@@ -2,7 +2,7 @@ from pypresence import Presence
 import time, re, os
 
 # local
-from kaasi_cli import kaa, scraper, anilist
+import kaa, scraper, anilist
 
 logo = """
 
@@ -392,7 +392,7 @@ while True:
             x = 0
 
     while x != 0:
-        if "gogoplay1.com" in str(embedVideoLink):
+        if "gogoplay4.com" in str(embedVideoLink):
             videoLink = scraper.vidstreaming(embedVideoLink)
         else:
             videoLink = scraper.bestremo(episodeData)

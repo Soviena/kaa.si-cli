@@ -1,5 +1,5 @@
 import re, json
-from kaasi_cli import scraper, anilist
+import scraper, anilist
 
 Base_Url = "https://www2.kickassanime.ro/"
 

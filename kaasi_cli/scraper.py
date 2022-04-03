@@ -1,6 +1,6 @@
 import cloudscraper, re, base64, requests, random
 from bs4 import BeautifulSoup
-from kaasi_cli import aes
+import aes
 
 def parse_web(url,headers=None,raw=False):
     try:
@@ -18,24 +18,25 @@ def vidstreaming(url):
     if "http" not in jw_link:
         jw_link = "https:"+jw_link
     print("Getting link...")
-    ajax_url = "https://gogoplay.io/encrypt-ajax.php"
+    ajax_url = "https://gogoplay4.com/encrypt-ajax.php"
     page = parse_web(jw_link)
     try: # Thanks to https://github.com/MeemeeLab/node-anime-viewer/blob/main/src/modules/anime.js
-        value6 = page.find('script', {'data-name':'ts'})['data-value']
-        value5 = page.find('meta',{'name':'crypto'})['content']
-        value7 = page.find('script',{'data-name':'crypto'})['data-value']
-        value1 = aes.decrypt(value7,(value6+value6).encode('utf8'),value6.encode('utf8'))
-        value4 = aes.decrypt(value5,value1,value6.encode('utf8'))
-        value2 = str(random.randint(1000000000000000,9999999999999999))
-        id = re.findall(r'id=([^&]*)',jw_link)[0]
-        encoded_id = aes.encrypt(id,value1,value2.encode('utf8'))
-        param = b'id='+encoded_id+b'&time=00'+value2.encode('utf8')+b'00'+(str(value4)[str(value4).find('&'):-1]).encode('utf8')
+        iv = '4770478969418267'.encode('utf8')
+        ajaxData = '63976882873559819639988080820907'.encode('utf8')
+        episodeVal = page.find('script', {'data-name':'episode'})['data-value']
+        decData = str(aes.decrypt(episodeVal, ajaxData, iv))
+        videoId = re.search(r'(.*)&title', decData).group(1)
+        # decData = re.search(r'(&.*)', string).group(1)
+        encryptVid = aes.encrypt(videoId, ajaxData, iv)
+        param = 'id='.encode('utf8')+encryptVid+re.search(r'(&.*)', decData).group(1).encode('utf8')
         head = {
             "x-requested-with":"XMLHttpRequest",
             "referer": jw_link,
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36 OPR/82.0.4227.50"
         }
-        json = eval(str(parse_web(ajax_url.encode('utf8')+b'?'+param,headers=head)))
+        print(param)
+        print(str(parse_web(ajax_url.encode('utf8')+b'?'+param,headers=head)))
+        json = eval(str(parse_web(ajax_url.encode('utf8')+'?'.encode('utf8')+param,headers=head)))
         for i in range(len(json['source'])):
             print("[{num}] {label}".format(num=i,label=json['source'][i]['label']))
         x = int(input("Select quality : "))
