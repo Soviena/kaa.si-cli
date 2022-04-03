@@ -24,23 +24,22 @@ def vidstreaming(url):
         iv = '4770478969418267'.encode('utf8')
         ajaxData = '63976882873559819639988080820907'.encode('utf8')
         episodeVal = page.find('script', {'data-name':'episode'})['data-value']
-        decData = str(aes.decrypt(episodeVal, ajaxData, iv))
+        decData = aes.decrypt(episodeVal, ajaxData, iv).decode()
         videoId = re.search(r'(.*)&title', decData).group(1)
         # decData = re.search(r'(&.*)', string).group(1)
         encryptVid = aes.encrypt(videoId, ajaxData, iv)
-        param = 'id='.encode('utf8')+encryptVid+re.search(r'(&.*)', decData).group(1).encode('utf8')
+        param = 'id='+encryptVid.decode()+re.search(r'(&.*)', decData).group(1)+'&alias='+videoId
         head = {
             "x-requested-with":"XMLHttpRequest",
             "referer": jw_link,
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36 OPR/82.0.4227.50"
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36"
         }
-        print(param)
-        print(str(parse_web(ajax_url.encode('utf8')+b'?'+param,headers=head)))
-        json = eval(str(parse_web(ajax_url.encode('utf8')+'?'.encode('utf8')+param,headers=head)))
-        for i in range(len(json['source'])):
-            print("[{num}] {label}".format(num=i,label=json['source'][i]['label']))
+        json = eval(str(parse_web(ajax_url+'?'+param,headers=head)))
+        data = eval(aes.decrypt(json['data'], ajaxData, iv).decode())
+        for i in range(len(data['source'])):
+            print("[{num}] {label}".format(num=i,label=data['source'][i]['label']))
         x = int(input("Select quality : "))
-        return (json['source'][x]['file']).replace('&amp;','&')
+        return (data['source'][x]['file']).replace('&amp;','&')
     except:
         if input("Error occured, try again ? [y/n]: ") in ('Y','y'):
             return vidstreaming(url)
