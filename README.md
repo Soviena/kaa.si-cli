@@ -39,4 +39,5 @@ inspired by https://github.com/pystardust/ani-cli
 ### note
 *the program will create kaasi.txt and history.txt in your terminal directory*
 
+*decryption failed on gogoanime vidstreaming link*
 
