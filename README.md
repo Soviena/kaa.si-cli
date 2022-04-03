@@ -27,7 +27,7 @@ inspired by https://github.com/pystardust/ani-cli
 - [MPV Website](https://mpv.io/)
 - [VLC Website](https://www.videolan.org/)
 - [Add program to path](https://www.architectryan.com/2018/03/17/add-to-the-path-on-windows-10/)
-3. Download latest package from [Release](https://github.com/Soviena/kaa.si-cli/releases)
+3. Download latest package from [Release](https://github.com/Soviena/kaa.si-cli/releases) or clone this repository using `git clone https://github.com/Soviena/kaa.si-cli`
 5. Extract and open folder as admin in cmd / powershell
 6. `python setup.py install` or `sudo python setup.py install` for linux
 7. and run `kaasi` in cmd / powershell to open the app
@@ -36,8 +36,11 @@ inspired by https://github.com/pystardust/ani-cli
 ## UNINSTALL
 1. `pip uninstall kaasi-cli` or `sudo pip uninstall kaasi-cli`
 
-### note
-*the program will create kaasi.txt and history.txt in your terminal directory*
+### Note
+*the program will create kaasi.txt and history.txt in your working directory, i.e home directory in linux and user directory in windows*.
 
-*decryption failed on gogoanime vidstreaming link*
+*if you have problem entering the anilist token, you can edit directly kaasi.txt*.
 
+`{'player': 'mpv/vlc', 'termux': False/True, 'anilist': True, 'token': 'paste token here', 'auto': True/False, 'username': 'Anilist_username'}`
+
+*This code updated once in a while, be sure to check it*
