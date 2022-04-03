@@ -2,7 +2,7 @@ from pypresence import Presence
 import time, re, os
 
 # local
-import kaa, scraper, anilist
+from kaasi_cli import kaa, scraper, anilist
 
 logo = """
 
