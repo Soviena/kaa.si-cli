@@ -43,12 +43,27 @@ def select_episode(link,direct=False,eps=None):
     return parse_appData(Base_Url+episodes[len(episodes)-x]['slug'])
 
 def check_link(js):
+    bestremo = False
+    vidstreaming = False
     if js['episode']['link1'] != '':
-        return js['episode']['link1'] # RETURN EMBED VIDEO LINK
-    
-    elif js['ext_servers'] != None:
+        bestremo = True
+    if js['ext_servers'] != None:
         for i in range(len(js['ext_servers'])):
             if js['ext_servers'][i]['name'] == 'Vidstreaming':
-                return js['ext_servers'][i]['link'] # RETURN EMBED VIDEO LINK
+                vidstreaming = True
+                vid = js['ext_servers'][i]['link']
     else:
         raise Exception("ONLY DIRECT DOWNLOAD AVAILABLE!!")
+    if bestremo and vidstreaming:
+        print("[0] Bestremo (kaa)\n[1] Vidstreaming (gogo)")
+        x = int(input("Choose main server : "))
+        if x == 0:
+            return js['episode']['link1']
+        elif x == 1:
+            return vid
+        else:
+            raise Exception("Invalid input!!")
+    if bestremo:
+        return js['episode']['link1']
+    elif vidstreaming:
+        return vid
