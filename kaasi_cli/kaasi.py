@@ -2,7 +2,8 @@ from pypresence import Presence
 import time, re, os
 
 # local
-from kaasi_cli import kaa, scraper, anilist
+# from kaasi_cli 
+import kaa, scraper, anilist
 
 logo = """
 
@@ -156,7 +157,7 @@ def play_vid(link,epsData):
                 print(link,"IS NOT TESTED IN VLC")
                 raise Exception("Unsupported")
         link = link['vlink']
-    elif re.search(r'maverickki|betaplayer|vidstreamingcdn',str(link)):
+    elif re.search(r'maverickki|betaplayer|vidstreamingcdn|gogo',str(link)):
         if cfg['termux']:
             if cfg['player'] == "mpv":
                 link = link.replace('\\','')
