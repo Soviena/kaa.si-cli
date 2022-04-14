@@ -21,8 +21,8 @@ def vidstreaming(url):
     ajax_url = "https://gogoplay4.com/encrypt-ajax.php"
     page = parse_web(jw_link)
     try: # Thanks to https://github.com/MeemeeLab/node-anime-viewer/blob/main/src/modules/anime.js
-        iv = '4770478969418267'.encode('utf8')
-        ajaxData = '63976882873559819639988080820907'.encode('utf8')
+        iv = '4786443969418267'.encode('utf8')
+        ajaxData = '63976882873536819639922083275907'.encode('utf8')
         episodeVal = page.find('script', {'data-name':'episode'})['data-value']
         decData = aes.decrypt(episodeVal, ajaxData, iv).decode()
         videoId = re.search(r'(.*?)\&', decData).group(1)
