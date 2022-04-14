@@ -44,3 +44,7 @@ inspired by https://github.com/pystardust/ani-cli
 `{'player': 'mpv/vlc', 'termux': False/True, 'anilist': True, 'token': 'paste token here', 'auto': True/False, 'username': 'Anilist_username'}`
 
 *This code updated once in a while, be sure to check it*
+<p align=center>
+Visit Since 14/4/2022<br/>
+  <a href="https://count.getloli.com/"><img src="https://count.getloli.com/get/@V?theme=rule34"/></a><br/>
+</p>
