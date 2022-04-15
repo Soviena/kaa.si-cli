@@ -225,8 +225,17 @@ def play_vid(link,epsData):
             if input("Update anilist progress ? [y/n] : ") in ('Y','y'):
                 updateAnilist(epsData,ani)
 
+def checkUpdate():
+    r = requests.get("https://raw.githubusercontent.com/Soviena/kaa.si-cli/main/version.py")
+    ver = re.findall(r'=(["\d.]*)', str(r.content))
+    if versioning.ver_int < ver[1]:
+        return True
+    else:
+        return False
 
 def kaasi():
+    if checkUpdate():
+        print("\033[91mNew update available\033[0m")
     pass
 
 
