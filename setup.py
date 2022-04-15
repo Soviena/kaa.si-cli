@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
-
+from version import versioning
 setup(
     name="kaasi-cli",
-    version="1.0.5.1",
+    version=versioning.ver,
     author="Soviena",
     author_email="rovino.rs@gmail.com",
     description="Stream anime from kaa.si and sync with anilist",

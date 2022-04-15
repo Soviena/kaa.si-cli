@@ -1,4 +1,4 @@
-import cloudscraper, re, base64, requests, random
+import cloudscraper, re, base64, requests, random, json
 from bs4 import BeautifulSoup
 from kaasi_cli import aes
 
@@ -21,13 +21,15 @@ def vidstreaming(url):
     ajax_url = "https://gogoplay4.com/encrypt-ajax.php"
     page = parse_web(jw_link)
     try: # Thanks to https://github.com/MeemeeLab/node-anime-viewer/blob/main/src/modules/anime.js
-        iv = '4786443969418267'.encode('utf8')
-        ajaxData = '63976882873536819639922083275907'.encode('utf8')
+        gogodata = requests.get("https://raw.githubusercontent.com/justfoolingaround/animdl-provider-benchmarks/master/api/gogoanime.json").json()
+        iv = gogodata['iv'].encode('utf8')
+        key = gogodata['key'].encode('utf8')
+        scn_key = gogodata['second_key'].encode('utf8')
         episodeVal = page.find('script', {'data-name':'episode'})['data-value']
-        decData = aes.decrypt(episodeVal, ajaxData, iv).decode()
+        decData = aes.decrypt(episodeVal, key, iv).decode()
         videoId = re.search(r'(.*?)\&', decData).group(1)
         # decData = re.search(r'(&.*)', string).group(1)
-        encryptVid = aes.encrypt(videoId, ajaxData, iv)
+        encryptVid = aes.encrypt(videoId, key, iv)
         param = 'id='+encryptVid.decode()+re.search(r'(&.*)', decData).group(1)+'&alias='+videoId
         head = {
             "x-requested-with":"XMLHttpRequest",
@@ -35,7 +37,7 @@ def vidstreaming(url):
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36"
         }
         json = eval(str(parse_web(ajax_url+'?'+param,headers=head)))
-        data = eval(aes.decrypt(json['data'], ajaxData, iv).decode())
+        data = eval(aes.decrypt(json['data'], scn_key, iv).decode())
         for i in range(len(data['source'])):
             print("[{num}] {label}".format(num=i,label=data['source'][i]['label']))
         x = int(input("Select quality : "))
