@@ -1,5 +1,5 @@
 from pypresence import Presence
-from version import versioning
+from kaasi_cli.version import versioning
 import time, re, os
 
 # local

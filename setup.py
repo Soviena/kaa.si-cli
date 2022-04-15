@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-from version import versioning
+from kaasi_cli.version import versioning
 setup(
     name="kaasi-cli",
     version=versioning.ver,
