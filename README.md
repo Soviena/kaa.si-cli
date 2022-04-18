@@ -35,6 +35,8 @@ inspired by https://github.com/pystardust/ani-cli
 
 ## UNINSTALL
 1. `pip uninstall kaasi-cli` or `sudo pip uninstall kaasi-cli`
+### Gogo server not working
+Impact old anime < 2018
 
 ### Note
 *the program will create kaasi.txt and history.txt in your working directory, i.e home directory in linux and user directory in windows*.
