@@ -1,6 +1,7 @@
 import cloudscraper, re, base64, requests, random, json
 from bs4 import BeautifulSoup
 from kaasi_cli import aes
+from binascii import unhexlify
 
 def parse_web(url,headers=None,raw=False):
     try:
@@ -22,9 +23,9 @@ def vidstreaming(url):
     page = parse_web(jw_link)
     try: # Thanks to https://github.com/MeemeeLab/node-anime-viewer/blob/main/src/modules/anime.js
         gogodata = requests.get("https://raw.githubusercontent.com/justfoolingaround/animdl-provider-benchmarks/master/api/gogoanime.json").json()
-        iv = gogodata['iv'].encode('utf8')
-        key = gogodata['key'].encode('utf8')
-        scn_key = gogodata['second_key'].encode('utf8')
+        iv = gogodata['iv'].encode()
+        key = gogodata['key'].encode()
+        scn_key = gogodata['second_key'].encode()
         episodeVal = page.find('script', {'data-name':'episode'})['data-value']
         decData = aes.decrypt(episodeVal, key, iv).decode()
         videoId = re.search(r'(.*?)\&', decData).group(1)
