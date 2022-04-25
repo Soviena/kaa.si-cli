@@ -105,6 +105,30 @@ def searchAnimeId(id):
     variable = {'id' : id}
     return requests.post(url, json={'query': query, 'variables': variable})
 
+def mediaListEntrySearch(ida, name):
+    query= """
+    query($id: Int, $uname: String) {
+        MediaList(id: $id, type:ANIME, userName: $uname){
+            media{
+                title {
+                    romaji
+                    english
+                    native
+                    userPreferred
+                }
+                status
+                id
+                nextAiringEpisode{
+                    airingAt
+                }                                     
+            }
+            progress     
+        }
+    }
+    """
+    variable = {'id' : ida, 'userName': name}
+    return requests.post(url, json={'query': query, 'variables': variable})
+
 def getListOfAnime(user,status):
     query = """
         query ($user: String, $status : [MediaListStatus]) { 

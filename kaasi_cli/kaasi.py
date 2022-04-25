@@ -43,22 +43,29 @@ def outputAnime(animeList):
         else:
             print("\033[92m[",i,"] ",animeList[i]['name'],"\033[0m")
 
-def updateWatchHistory(epsData,anilist=None):
-    epsLink = str(kaa.Base_Url+epsData['anime']['slug']+"/"+epsData['episode']['slug']+'-'+epsData['episode']['slug_id']).replace("\\","")
-    try :
-        watch_history['anime'][epsData['anime']['name']] = {'label' : epsData['episode']['name'], 'next-link' : kaa.Base_Url+epsData['episode']['next']['slug'], 'episodeLink' : epsLink, 'status': epsData['anime']['status']}
-        watch_history['last'] = {'name' : epsData['anime']['name'] ,'episode-label' : epsData['episode']['name'], 'next-link' : kaa.Base_Url+epsData['episode']['next']['slug'], 'episodeLink' : epsLink, 'status' : epsData['anime']['status']}
-    except :
-        watch_history['anime'][epsData['anime']['name']] = {'label' : epsData['episode']['name'], 'next-link' : '', 'episodeLink' : epsLink, 'status' : epsData['anime']['status']}
-        watch_history['last'] = {'name' : epsData['anime']['name'] ,'episode-label' : epsData['episode']['name'], 'next-link' : '', 'episodeLink' : epsLink, 'status' : epsData['anime']['status']}
-    if anilist != None:
-        watch_history['anime'][epsData['anime']['name']]['mediaId'] = anilist['media']['id']
-        watch_history['last']['mediaId'] = anilist['media']['id']
-        if epsData['anime']['status'] == "Currently Airing" and anilist['media']['status'] in ('RELEASING','NOT_YET_RELEASED'):
+def updateWatchHistory(epsData,anilist=None,noEpsData=False):
+    if noEpsData:
+        watch_history['anime'][anilist['media']['title']['userPreferred']] = {'label' : anilist['progress'], 'next-link' : None, 'episodeLink' : None, 'status' : anilist['media']['status']}
+        watch_history['anime'][anilist['media']['title']['userPreferred']]['mediaId'] = anilist['media']['id']
+        if anilist['media']['status'] in ('RELEASING','NOT_YET_RELEASED'):
+            watch_history['airing'][anilist['media']['title']['userPreferred']] = watch_history['anime'][anilist['media']['title']['userPreferred']]
+            watch_history['airing'][anilist['media']['title']['userPreferred']]['airingAt'] = anilist['media']['nextAiringEpisode']['airingAt']
+    else:
+        epsLink = str(kaa.Base_Url+epsData['anime']['slug']+"/"+epsData['episode']['slug']+'-'+epsData['episode']['slug_id']).replace("\\","")
+        try :
+            watch_history['anime'][epsData['anime']['name']] = {'label' : epsData['episode']['name'], 'next-link' : kaa.Base_Url+epsData['episode']['next']['slug'], 'episodeLink' : epsLink, 'status': epsData['anime']['status']}
+            watch_history['last'] = {'name' : epsData['anime']['name'] ,'episode-label' : epsData['episode']['name'], 'next-link' : kaa.Base_Url+epsData['episode']['next']['slug'], 'episodeLink' : epsLink, 'status' : epsData['anime']['status']}
+        except :
+            watch_history['anime'][epsData['anime']['name']] = {'label' : epsData['episode']['name'], 'next-link' : '', 'episodeLink' : epsLink, 'status' : epsData['anime']['status']}
+            watch_history['last'] = {'name' : epsData['anime']['name'] ,'episode-label' : epsData['episode']['name'], 'next-link' : '', 'episodeLink' : epsLink, 'status' : epsData['anime']['status']}
+        if anilist != None:
+            watch_history['anime'][epsData['anime']['name']]['mediaId'] = anilist['media']['id']
+            watch_history['last']['mediaId'] = anilist['media']['id']
+            if epsData['anime']['status'] == "Currently Airing" and anilist['media']['status'] in ('RELEASING','NOT_YET_RELEASED'):
+                watch_history['airing'][epsData['anime']['name']] = watch_history['anime'][epsData['anime']['name']]
+                watch_history['airing'][epsData['anime']['name']]['airingAt'] = anilist['media']['nextAiringEpisode']['airingAt']
+        elif epsData['anime']['status'] == "Currently Airing":
             watch_history['airing'][epsData['anime']['name']] = watch_history['anime'][epsData['anime']['name']]
-            watch_history['airing'][epsData['anime']['name']]['airingAt'] = anilist['media']['nextAiringEpisode']['airingAt']
-    elif epsData['anime']['status'] == "Currently Airing":
-        watch_history['airing'][epsData['anime']['name']] = watch_history['anime'][epsData['anime']['name']]
     with open('history.txt','w',encoding='utf-8') as histo:
         histo.write(str(watch_history))
 
@@ -89,27 +96,30 @@ def fetchAnilist():
     x = eval(anilist.getListOfAnime(cfg['username'],'CURRENT').replace(b'null',b'None'))
     for i in x['data']['MediaListCollection']['lists'][0]['entries']:
         print("\033[94mFetching",i['media']['title']['romaji'],"\033[0m")
-        anime = kaa.search_anime(i['media']['title']['romaji'])
-        if anime == None:
-            anime = kaa.search_anime(i['media']['title']['english'])
-        if anime == None:
-            print("\033[91mCANT FIND",i['media']['title']['romaji'],"episode",i['progress'],"\033[0m")
-            animes = kaa.search_anime(input("Pls search manually, type the anime name : "))
-            try:
-                progress = i['progress']
-                animeLink = selectAnime(animes)
-                epsData = kaa.select_episode(animeLink,True,progress)
-                updateWatchHistory(epsData,i)
-            except:
-                print("\033[91mError ocurred !\033[0m")
-                j+=1
-        else:
-            progress = i['progress']
-            animeLink = kaa.Base_Url+anime[0]['slug']
+        updateWatchHistory(None,i,True)
+
+def anilistToKaasiLink(media):
+    global watch_history
+    watch_history.pop([media['media']['title']['userPreferred']])
+    anime = kaa.search_anime(media['media']['title']['romaji'])
+    if anime == None:
+        anime = kaa.search_anime(media['media']['title']['english'])
+    if anime == None:
+        print("\033[91mCANT FIND",media['media']['title']['romaji'],"episode",media['progress'],"\033[0m")
+        animes = kaa.search_anime(input("Pls search manually, type the anime name : "))
+        try:
+            progress = media['progress']
+            animeLink = selectAnime(animes)
             epsData = kaa.select_episode(animeLink,True,progress)
-            updateWatchHistory(epsData,i)
-    if j>0 :
-        print("\033[91m",j,"anime's failed to sync!!\033[0m")
+            updateWatchHistory(epsData,media)
+        except:
+            print("\033[91mError ocurred !\033[0m")
+    else:
+        progress = media['progress']
+        animeLink = kaa.Base_Url+anime[0]['slug']
+        epsData = kaa.select_episode(animeLink,True,progress)
+        updateWatchHistory(epsData,media)
+    return epsData
 
 def searchAnilist(query):
     q = anilist.searchAnime(query,True)
@@ -344,23 +354,31 @@ while True:
         else:
             try:
                 x = int(x)
-                animeLink = re.findall(r"(.*)\/episode",animes_v[x]['episodeLink'])[0]
-                if animes_v[x]['status'] in ("Finished Airing","Completed") and animes_v[x]['next-link'] == '':
-                    print('The anime is finished airing and no next episode')
-                    x = 0
-                elif animes_v[x]['next-link'] == '':
-                    episodeData = kaa.parse_appData(animes_v[x]['episodeLink'])  
-                    if episodeData['episode']['next'] == None:
-                        print('not yet updated' )
+                try:
+                    animeLink = re.findall(r"(.*)\/episode",animes_v[x]['episodeLink'])[0]
+                    if animes_v[x]['status'] in ("Finished Airing","Completed") and animes_v[x]['next-link'] == '':
+                        print('The anime is finished airing and no next episode')
                         x = 0
+                    elif animes_v[x]['next-link'] == '':
+                        episodeData = kaa.parse_appData(animes_v[x]['episodeLink'])  
+                        if episodeData['episode']['next'] == None:
+                            print('not yet updated' )
+                            x = 0
+                        else:
+                            episodeData = kaa.parse_appData(kaa.Base_Url+episodeData['episode']['next']['slug'])
+                            embedVideoLink = kaa.check_link(episodeData)
+                            x = -1
                     else:
-                        episodeData = kaa.parse_appData(kaa.Base_Url+episodeData['episode']['next']['slug'])
-                        embedVideoLink = kaa.check_link(episodeData)
+                        episodeData = kaa.parse_appData(animes_v[x]['next-link'])
+                        embedVideoLink = kaa.check_link(episodeData) 
                         x = -1
-                else:
-                    episodeData = kaa.parse_appData(animes_v[x]['next-link'])
-                    embedVideoLink = kaa.check_link(episodeData) 
-                    x = -1
+                except:
+                    epsData = anilistToKaasiLink(anilist.mediaListEntrySearch(watch_history[animes_v[x]['mediaId']], cfg['username']))
+                    episodeData = epsData['episodeLink']
+                    animeLink = re.findall(r"(.*)\/episode",watch_history['anime'][epsData['anime']['name']]['episodeLink'])[0]
+                    # if epsData['anime']['status'] in ("Finished Airing","Completed") and animes_v[x]['next-link'] == '':
+
+
             except :
                 print("Error")
                 x = 0
