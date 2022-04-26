@@ -373,11 +373,12 @@ while True:
                         embedVideoLink = kaa.check_link(episodeData) 
                         x = -1
                 except:
-                    epsData = anilistToKaasiLink(anilist.mediaListEntrySearch(watch_history[animes_v[x]['mediaId']], cfg['username']))
+                    epsData = anilistToKaasiLink(anilist.mediaListEntrySearch(animes_v[x]['mediaId'], cfg['username'])["data"]["MediaList"])
                     episodeData = epsData['episodeLink']
                     animeLink = re.findall(r"(.*)\/episode",watch_history['anime'][epsData['anime']['name']]['episodeLink'])[0]
-                    # if epsData['anime']['status'] in ("Finished Airing","Completed") and animes_v[x]['next-link'] == '':
-
+                    if epsData['anime']['status'] in ("Finished Airing","Completed") and animes_v[x]['next-link'] == '':
+                        input()
+                        pass
 
             except :
                 print("Error")

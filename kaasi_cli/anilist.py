@@ -1,5 +1,6 @@
 import os
 import requests
+import json
 
 url = 'https://graphql.anilist.co'
 
@@ -127,7 +128,7 @@ def mediaListEntrySearch(ida, name):
     }
     """
     variable = {'id' : ida, 'userName': name}
-    return requests.post(url, json={'query': query, 'variables': variable})
+    return requests.post(url, json={'query': query, 'variables': variable}).json()
 
 def getListOfAnime(user,status):
     query = """
