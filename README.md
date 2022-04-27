@@ -35,8 +35,6 @@ inspired by https://github.com/pystardust/ani-cli
 
 ## UNINSTALL
 1. `pip uninstall kaasi-cli` or `sudo pip uninstall kaasi-cli`
-### Gogo server not working
-Impact old anime < 2018
 
 ### Note
 *the program will create kaasi.txt and history.txt in your working directory, i.e home directory in linux and user directory in windows*.
@@ -45,7 +43,11 @@ Impact old anime < 2018
 
 `{'player': 'mpv/vlc', 'termux': False/True, 'anilist': True, 'token': 'paste token here', 'auto': True/False, 'username': 'Anilist_username'}`
 
+*gogo server is unreliable, pls open an issue if gogo server is not working*
+
 *This code updated once in a while, be sure to check it*
+
+
 <p align=center>
 Visit Since 14/4/2022<br/>
   <a href="https://count.getloli.com/"><img src="https://count.getloli.com/get/@V?theme=rule34"/></a><br/>
