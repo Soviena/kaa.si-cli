@@ -239,8 +239,6 @@ def checkUpdate():
         return False
 
 def kaasi():
-    if checkUpdate():
-        print("\033[91mNew update available\033[0m")
     pass
 
 
@@ -268,6 +266,8 @@ except:
 while True:
     if dcrpc:
         RPC.update(state="In Main Menu", details="Browsing anime")
+    if checkUpdate():
+        print("\033[91mNew update available\033[0m")
     print(logo+"\033[93mtype H for history\ntype R to resume watching\ntype A to see rencently uploaded\n\033[1mor just type the anime title to search\033[0m\n")
     query = input("\033[4m\033[92mInput\033[0m : ")
     if query in ('H','h'):
