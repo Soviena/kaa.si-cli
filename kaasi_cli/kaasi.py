@@ -80,7 +80,7 @@ def updateAnilist(epsData,ani):
 def selectAnime(animeList):
     outputAnime(animeList)
     x = int(input("\033[4m\033[92mInput\033[0m : "))
-    return kaa.Base_Url+animeList[x]['slug'] 
+    return kaa.Base_Url+animeList[x]['slug']
 
 def fetchAnilist():
     global watch_history
@@ -100,12 +100,17 @@ def fetchAnilist():
                 animeLink = selectAnime(animes)
                 epsData = kaa.select_episode(animeLink,True,progress)
                 updateWatchHistory(epsData,i)
-            except:
+            except Exception as e:
+                print(e)
                 print("\033[91mError ocurred !\033[0m")
                 j+=1
         else:
+            if len(anime)>1:
+                print("select the correct one : ")
+                animeLink = selectAnime(anime)
+            else:
+                animeLink = kaa.Base_Url+anime[0]['slug']
             progress = i['progress']
-            animeLink = kaa.Base_Url+anime[0]['slug']
             epsData = kaa.select_episode(animeLink,True,progress)
             updateWatchHistory(epsData,i)
     if j>0 :
@@ -292,7 +297,8 @@ while True:
                 try:
                     fetchAnilist()
                     print("SYNCED!")
-                except:
+                except Exception as e:
+                    print(e)
                     print("\n\033[91mFAILED TO CONNECT TO ANILIST!\033[0m\n\nToo Many request or anilist API is down!\npls wait a few minutes and try again\n")
             else:
                 print("NOT CONNECTED TO ANILIST")    
@@ -338,7 +344,8 @@ while True:
                     episodeData = kaa.parse_appData(airing_v[x]['next-link'])    
                     embedVideoLink = kaa.check_link(episodeData) 
                     x = -1
-            except :
+            except Exception as e:
+                print(e)
                 print("Error")
                 x = 0            
         else:
@@ -361,7 +368,8 @@ while True:
                     episodeData = kaa.parse_appData(animes_v[x]['next-link'])
                     embedVideoLink = kaa.check_link(episodeData) 
                     x = -1
-            except :
+            except Exception as e:
+                print(e)
                 print("Error")
                 x = 0
 
@@ -408,7 +416,8 @@ while True:
             videoLink = scraper.bestremo(episodeData)
         try:
             play_vid(videoLink,episodeData)
-        except:
+        except Exception as e:
+            print(e)
             print("Some error occurred!")
         print("[1] Next episode\n[2] Play again\n[3] Select episode\n[0] Back to menu")
         x = int(input("Input : "))
