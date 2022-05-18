@@ -1,6 +1,6 @@
 from pypresence import Presence
 from kaasi_cli.version import versioning
-import time, re, os
+import time, re, os, requests
 
 # local
 from kaasi_cli import kaa, scraper, anilist
@@ -137,11 +137,13 @@ def termux_mpv_referrer(ref):
 
 def play_vid(link,epsData):
     global watch_history
+    try:
+        display_title = epsData['anime']['name'] + " ("+ re.findall(r' (\d*)',epsData['episode']['name'])[0] +" of "+str(len(epsData['episodes'])) + ")"
+    except:
+        display_title = epsData['anime']['name']
     if dcrpc:
-        try:
-            RPC.update(state=epsData['anime']['name'] + " ("+ re.findall(r' (\d*)',epsData['episode']['name'])[0] +" of "+str(len(epsData['episodes'])) + ")", details="Watching anime", start=time.time(),large_image="https://www2.kickassanime.ro/uploads/"+epsData['anime']['image'],large_text=epsData['anime']['name'])
-        except:
-            RPC.update(state=epsData['anime']['name'], details="Watching anime", start=time.time())
+        RPC.update(state=display_title, details="Watching anime", start=time.time(),large_image="https://www2.kickassanime.ro/uploads/"+epsData['anime']['image'],large_text=epsData['anime']['name'])
+        
     referer = ''
     sub = ''
     if type(link) is dict:            
@@ -200,6 +202,8 @@ def play_vid(link,epsData):
             syx += referer
         if sub != '':
             syx += sub
+        if cfg['player'] == "mpv":
+            syx += ' --force-media-title="'+display_title+'"'
     print(syx)
     os.system(syx)
     if epsData['anime']['name'] in watch_history['anime']:
@@ -231,9 +235,9 @@ def play_vid(link,epsData):
                 updateAnilist(epsData,ani)
 
 def checkUpdate():
-    r = requests.get("https://raw.githubusercontent.com/Soviena/kaa.si-cli/main/version.py")
+    r = requests.get("https://raw.githubusercontent.com/Soviena/kaa.si-cli/main/kaasi_cli/version.py")
     ver = re.findall(r'=(["\d.]*)', str(r.content))
-    if versioning.ver_int < ver[1]:
+    if versioning.ver_int < int(ver[1]):
         return True
     else:
         return False
